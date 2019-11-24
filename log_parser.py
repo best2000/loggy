@@ -1,21 +1,21 @@
 import re
 
+class time:
+    def __init__(self):
+        self.day = None
+        self.month = None
+        self.year = None
+        self.hour = None
+        self.minute = None
+        self.second = None
+        self.zone = None
+class http_req:
+    def __init__(self):
+        self.method = None
+        self.path = None
+        self.protocol = None
 class loggy:
-    class time:
-        def __int__(self):
-            self.day = None
-            self.month = None
-            self.year = None
-            self.hour = None
-            self.minute = None
-            self.second = None
-            self.zone = None
-    class http_req:
-        def __init__(self):
-            self.method = None
-            self.path = None
-            self.protocol = None
-    def __int__(self):
+    def __init__(self):
         self.ip = None
         self.identity = None
         self.userID = None
@@ -25,8 +25,6 @@ class loggy:
         self.return_size = None
         self.referer = None
         self.user_agent = None
-
-
 
 with open('apache_log.txt') as log:
     logline = log.readline()
@@ -83,4 +81,4 @@ with open('apache_log.txt') as log:
 
 
 
-    #วันที่นี้นี้เข้ามากี่ไอพี แต่ละไอพีมาจากที่ไหนบนโลก
+   
