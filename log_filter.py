@@ -46,3 +46,15 @@ for i in filtered_loglist:
         print(i, ":", resdict[i])
     print("------------------------------")
 
+payload = '[{"query": "208.80.152.201", "fields": "country,lat,lon"}, {"query": "202.29.154.174", "fields": "country,lat,lon"}]'
+r = requests.post("http://ip-api.com/batch", data=payload)
+dic = r.json()
+for i in dic:
+    for j in i:
+        print(j,':', i[j])
+    print("---------------------")
+
+#add attribute lat long to class obj
+#ช่วงเวลานี้เข้ามากี่ไอพี
+#searh ip ว่ามีเข้ามาไหม
+#keep log file info seperate
