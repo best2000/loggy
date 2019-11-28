@@ -1,30 +1,6 @@
+from class_all import * #class: loggy, ip, time, http_req
 import re
 
-class time:
-    def __init__(self):
-        self.day = None
-        self.month = None
-        self.year = None
-        self.hour = None
-        self.minute = None
-        self.second = None
-        self.zone = None
-class http_req:
-    def __init__(self):
-        self.method = None
-        self.path = None
-        self.protocol = None
-class loggy:
-    def __init__(self):
-        self.ip = None
-        self.identity = None
-        self.userID = None
-        self.time = time()
-        self.http_req = http_req()
-        self.status_code = None
-        self.return_size = None
-        self.referer = None
-        self.user_agent = None
 
 with open('apache_log.txt') as log:
     logline = log.readline()
@@ -49,7 +25,10 @@ with open('apache_log.txt') as log:
     temp[0][3][2] = re.split(':', temp[0][3][2])
     temp[0].remove('')
     #print(temp[0])
-    logobj.ip = temp[0][0]
+    #check ip info from ip_database if not add new ip info 
+    temp[0][0] # this is ip adress
+    ###################
+
     logobj.identity = temp[0][1]
     logobj.userID = temp[0][2]
     logobj.time.day = temp[0][3][0]
@@ -69,7 +48,7 @@ with open('apache_log.txt') as log:
     logobj.http_req.protocol = temp[1][2]
     #print(temp[1])
 
-
+    #add loggy obj write it to history file
 
 
 
