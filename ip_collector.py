@@ -15,7 +15,8 @@ def ip_exist(address): #check exist return True//False
             return False
 
 def ip_add(address): #add ip object to database
-    if ip_exist(address) == False:
+    exist = ip_exist(address)
+    if exist == False:
         while True:
             res = requests.get("http://ip-api.com/json/"+address+"?fields=country,city,lat,lon,isp")
             if res.status_code == 429:
@@ -33,7 +34,7 @@ def ip_add(address): #add ip object to database
         with open('class_ip_obj.pickle', 'ab') as file:
             pickle.dump(object, file)
         print("ip added :", object.address, object.country, object.city, object.lat, object.lat, object.lon, object.isp)
-    elif ip_exist(address) == True:
+    elif exist == True:
         print(address, "is already exist")
     else:
         print("error!")
@@ -60,17 +61,15 @@ def ip_remove(address):
     print("ip removed :", address)
         
 def ip_show_info(address):
-    if ip_exist(address) == True:
-        with open('class_ip_obj.pickle', 'rb') as file:     
-            try:
-                while True:
-                    object = pickle.load(file) #class ip object
-                    if object.address == address:
-                        print(object.address, object.country, object.city, object.lat, object.lat, object.lon, object.isp)
-            except:
-                pass
-    else:
-        print(address, "is not exist")
+    with open('class_ip_obj.pickle', 'rb') as file:     
+        try:
+            while True:
+                object = pickle.load(file) #class ip object
+                if object.address == address:
+                    print(object.address, object.country, object.city, object.lat, object.lat, object.lon, object.isp)
+                    break
+        except:
+            print(address, "is not exist")
 
 def ip_show_info_all(): #show all ip object in database
     with open('class_ip_obj.pickle', 'rb') as file:     
@@ -82,17 +81,16 @@ def ip_show_info_all(): #show all ip object in database
             pass
 
 def ip_get_object(address):
-    if ip_exist(address) == True:
-        with open('class_ip_obj.pickle', 'rb') as file:     
-            try:
-                while True:
-                    object = pickle.load(file) #class ip object
-                    if object.address == address:
-                        return object
-            except:
-                pass
-    else:
-        print(address, "is not exist")
+    with open('class_ip_obj.pickle', 'rb') as file:     
+        try:
+            while True:
+                object = pickle.load(file) #class ip object
+                if object.address == address:
+                    return object
+        except:
+            print(address, "is not exist")
 
+        
 
+ip_show_info("183.88.58.46")
 #gui

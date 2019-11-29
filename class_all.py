@@ -25,6 +25,7 @@ class http_req:
         
 class loggy:
     def __init__(self):
+        self.default_str = None
         self.ip = ip()
         self.identity = None
         self.userID = None

@@ -2,6 +2,7 @@ import re
 import pickle
 from class_all import *
 from ip_collector import *
+from loggy_collector import *
 
 loggy_list = []
 with open('apache_log.txt') as log:
@@ -9,27 +10,19 @@ with open('apache_log.txt') as log:
     for i in range(count):
         logline = log.readline()
         temp = re.split('"', logline)
-        #for i in temp:
-            #print('[1]', i)
-        #print("-------------------")
-        #remove zone
         temp.remove(' ')
         temp.pop()
 
-        #for i in temp:
-            #print('[2]', i)
-        
         #temp[0]-------------------------------------------
-        #print(temp[0])
         temp[0] = temp[0].replace('[','')
         temp[0] = temp[0].replace(']','')
         temp[0] = re.split(' ', temp[0])
         temp[0][3] = re.split('/', temp[0][3])
         temp[0][3][2] = re.split(':', temp[0][3][2])
         temp[0].remove('')
-        #print(temp[0])
         
         object = loggy()
+        object.default_str = logline
         ip_add(temp[0][0]) #add to ip datbase auto check exist
         object.ip = ip_get_object(temp[0][0])
         object.identity = temp[0][1]
@@ -43,12 +36,10 @@ with open('apache_log.txt') as log:
         object.time.zone = temp[0][4]
         
         #temp[1]----------------------------------
-        #print(temp[1])
         temp[1] = re.split(' ', temp[1])
         object.http_req.method = temp[1][0]
         object.http_req.path = temp[1][1]
         object.http_req.protocol = temp[1][2]
-        #print(temp[1])
 
         #temp[2]----------------------------------
         temp[2] = re.split(' ', temp[2])
@@ -64,6 +55,7 @@ with open('apache_log.txt') as log:
 
         loggy_list.append(object)
 
+    loggy_rewrite(loggy_list)
 
 
 
