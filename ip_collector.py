@@ -8,13 +8,20 @@ def ip_exist(address): #check exist return True//False
             while True:
                 object = pickle.load(file) #class ip object
                 if object.address == address:
+                    print("exist :", object.address)
                     return True
         except:
+            print("not exist :", address)
             return False
 
 def ip_add(address): #add ip object to database
     if ip_exist(address) == False:
-        res = requests.get("http://ip-api.com/json/"+address+"?fields=country,city,lat,lon,isp")
+        while True:
+            res = requests.get("http://ip-api.com/json/"+address+"?fields=country,city,lat,lon,isp")
+            if res.status_code == 429:
+                print("code 429 : waiting...")
+                continue
+            break
         info_dict = res.json()
         object = ip()
         object.address = address
@@ -60,7 +67,6 @@ def ip_show_info(address):
                     object = pickle.load(file) #class ip object
                     if object.address == address:
                         print(object.address, object.country, object.city, object.lat, object.lat, object.lon, object.isp)
-                        break
             except:
                 pass
     else:
@@ -75,4 +81,18 @@ def ip_show_info_all(): #show all ip object in database
         except:
             pass
 
-ip_show_info_all()
+def ip_get_object(address):
+    if ip_exist(address) == True:
+        with open('class_ip_obj.pickle', 'rb') as file:     
+            try:
+                while True:
+                    object = pickle.load(file) #class ip object
+                    if object.address == address:
+                        return object
+            except:
+                pass
+    else:
+        print(address, "is not exist")
+
+
+#gui
