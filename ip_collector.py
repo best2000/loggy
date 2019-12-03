@@ -90,7 +90,4 @@ def ip_get_object(address):
         except:
             print(address, "is not exist")
 
-        
-
-ip_show_info("183.88.58.46")
 #gui
