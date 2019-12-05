@@ -2,6 +2,15 @@ import re
 from ip_collector import *
 from loggy_collector import *
 
+help = """
+COMMANDS EXAMPLE
+log showall                 show all loggy in loggy database
+log search date <date>      search loggy by date (ex:16/May/2000)
+log search ip <ip>          search loggy by ip (ex:0.0.0.0)
+ip showall                  show all ip in ip database
+ip show <ip>                show specific ip in database    
+"""
+
 while True:
     cmd = re.split(' ', input('cmd : '))
     if cmd[0] == 'ip':
@@ -20,3 +29,5 @@ while True:
                 except: pass
         except: pass
     elif cmd[0] == "exit": break
+    elif cmd[0] == "help": 
+        print(help)
