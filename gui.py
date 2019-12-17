@@ -7,12 +7,20 @@ from tkcalendar import Calendar
 
 def showLOG():
     listbox.delete(0,'end')
+    la.configure(text='All Log')
+    la.grid(columnspan= 3)
+    e1.grid_remove()
+    button.grid_remove()
     loggy_list = loggy_all()
     for object in loggy_list:
         listbox.insert('end', object.default_str)
 
 def showIP():
     listbox.delete(0,'end')
+    la.configure(text='All IP')
+    la.grid(columnspan= 3)
+    e1.grid_remove()
+    button.grid_remove()
     ip_lis = ip_all()
     for object in ip_lis:
         Ip = object.address+' '+object.country+' '+object.city+' '+str(object.lat)+' '+str(object.lon)+' '+object.isp
@@ -37,6 +45,7 @@ def ip_search():
         listbox.insert('end', Ip)
     la.configure(text='IP Search')
     la.grid() 
+    la.grid(columnspan= 1)
     e1.grid()
     button.configure(text="OK", command=ip_search)
     button.grid()
@@ -49,6 +58,7 @@ def log_search_ip():
             listbox.insert('end', object.default_str)
     la.configure(text='Log Search by IP')
     la.grid() 
+    la.grid(columnspan= 1)
     e1.grid()
     button.configure(text="OK", command=log_search_ip)
     button.grid()
@@ -56,13 +66,15 @@ def log_search_ip():
 def log_search_date_pop():
     def log_search_date():
         listbox.delete(0,'end')
+        la.configure(text='Log on Date '+cal.format_date(cal.selection_get()))
+        la.grid(columnspan= 3)
         loggy_list = loggy_search_date(cal.selection_get())
         for object in loggy_list:
             listbox.insert('end', object.default_str)
 
     pop = Toplevel()
     pop.title("Log Search by Date")
-    cal = Calendar(pop, selectmode='day', showothermonthdays=False, year=2015, month=5, font="Arial 14")
+    cal = Calendar(pop, selectmode='day', showothermonthdays=False, year=2015, month=5, font="Arial 14", date_pattern='dd/mm/y')
     cal.grid(row=0, column=0)
     Button(pop, text="OK", command=log_search_date, font="Arial 14").grid(row=1, column=0)
     #hilight date
@@ -76,6 +88,8 @@ def log_search_date_pop():
 def log_search_datedur_pop():
     def log_search_datedur():
         listbox.delete(0,'end')
+        la.configure(text='Log on Date '+cal1.format_date(cal1.selection_get())+' '+e1.get()+' - '+cal2.format_date(cal2.selection_get())+' '+e2.get())
+        la.grid(columnspan= 3)
         d1 = cal1.selection_get()
         t1 = re.split(':', e1.get())
         dt1 = datetime.datetime(d1.year, d1.month, d1.day, int(t1[0]), int(t1[1]), int(t1[2])) 
@@ -96,7 +110,7 @@ def log_search_datedur_pop():
     e2.grid(row=1, column=5)
     e2.insert(END, '00:00:00')
     Button(pop, text="OK", command=log_search_datedur, font="Arial 14").grid(row=2, column=3)
-    cal1 = Calendar(pop, selectmode='day', showothermonthdays=False, year=2015, month=5, font="Arial 14")
+    cal1 = Calendar(pop, selectmode='day', showothermonthdays=False, year=2015, month=5, font="Arial 14", date_pattern='dd/mm/y')
     cal1.grid(row=0, column=0, columnspan=3)
     datelis = [] 
     for object in loggy_all():
@@ -104,7 +118,7 @@ def log_search_datedur_pop():
         if obj_date not in datelis:
             datelis.append(obj_date)
             cal1.calevent_create(obj_date, 'log', tags=['log'])
-    cal2 = Calendar(pop, selectmode='day', showothermonthdays=False, year=2015, month=5, font="Arial 14")
+    cal2 = Calendar(pop, selectmode='day', showothermonthdays=False, year=2015, month=5, font="Arial 14", date_pattern='dd/mm/y')
     cal2.grid(row=0, column=4, columnspan=3)
     datelis = [] 
     for object in loggy_all():

@@ -34,13 +34,26 @@ def loggy_search_datedur(dt1, dt2): #datetime - datetime
         try:
             while True:
                 object = pickle.load(file) 
-                if (object.datetime.year >= dt1.year and object.datetime.year <= dt2.year 
-                and object.datetime.month >= dt1.month and object.datetime.month <= dt2.month
-                and object.datetime.day >= dt1.day and object.datetime.day <= dt2.day
-                and object.datetime.hour >= dt1.hour and object.datetime.hour <= dt2.hour
-                and object.datetime.minute >= dt1.minute and object.datetime.minute <= dt2.minute
-                and object.datetime.second >= dt1.second and object.datetime.second <= dt2.second):
-                    filtered_loggylist.append(object)
+                if dt1.day == dt2.day and dt1.month == dt2.month and dt1.year == dt1.year:
+                    if (object.datetime.year == dt1.year 
+                    and object.datetime.month == dt1.month 
+                    and object.datetime.day == dt1.day 
+                    and object.datetime.hour >= dt1.hour and object.datetime.hour <= dt2.hour
+                    and object.datetime.minute >= dt1.minute and object.datetime.minute <= dt2.minute
+                    and object.datetime.second >= dt1.second and object.datetime.second <= dt2.second):
+                        filtered_loggylist.append(object)
+                else:
+                    if object.datetime.day == dt1.day and object.datetime.month == dt1.month and object.datetime.year == dt1.year: #on date1
+                        #not full day log time is essential
+                        pass
+                    elif object.datetime.day == dt2.day and object.datetime.month == dt2.month and object.datetime.year == dt2.year: #on date2
+                        #not full day log time is essential
+                        pass
+                    else:
+                        #full day log 24 hours
+                        pass
+                
+
         except: pass
     return filtered_loggylist
 
