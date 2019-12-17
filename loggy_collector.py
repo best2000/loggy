@@ -2,14 +2,15 @@ import pickle, re
 from class_all import *
 from ip_collector import *
 
-def loggy_show_info_all(): #show all loggy object in database
+def loggy_all(): #show all loggy object in database
+    loggy_list = []
     with open('class_loggy_obj.pickle', 'rb') as file:     
         try:
             while True:
                 object = pickle.load(file) 
-                print(object.default_str)
+                loggy_list.append(object)
         except:
-            pass
+            return loggy_list
 
 def loggy_show_loggy(loggy_list):
     for object in loggy_list:
@@ -83,8 +84,8 @@ def loggy_database_rewrite(loggy_list):
                 
 def loggy_read_log_file(path): #read log line put it into object loggy and save in database RETURN loggy_list
     loggy_list = []
-    with open('apache_log.txt') as log:
-        count = len(open('apache_log.txt').readlines())
+    with open(path) as log:
+        count = len(open(path).readlines())
         for i in range(count):
             logline = log.readline()
             temp = re.split('"', logline)

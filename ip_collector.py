@@ -59,26 +59,16 @@ def ip_remove(address):
             with open('class_ip_obj.pickle', 'ab') as file:
                 pickle.dump(ip_list[i], file)
     print("ip removed :", address)
-        
-def ip_show_info(address):
-    with open('class_ip_obj.pickle', 'rb') as file:     
-        try:
-            while True:
-                object = pickle.load(file) #class ip object
-                if object.address == address:
-                    print(object.address, object.country, object.city, object.lat, object.lat, object.lon, object.isp)
-                    break
-        except:
-            print(address, "is not exist")
 
-def ip_show_info_all(): #show all ip object in database
+def ip_all(): #show all ip object in database
+    ip_lis = []
     with open('class_ip_obj.pickle', 'rb') as file:     
         try:
             while True:
                 object = pickle.load(file) #class ip object
-                print(object.address, object.country, object.city, object.lat, object.lat, object.lon, object.isp)
+                ip_lis.append(object)
         except:
-            pass
+            return ip_lis
 
 def ip_get_object(address):
     with open('class_ip_obj.pickle', 'rb') as file:     
