@@ -7,16 +7,6 @@ class ip:
         self.lon = None
         self.isp = None
 
-class time:
-    def __init__(self):
-        self.day = None
-        self.month = None
-        self.year = None
-        self.hour = None
-        self.minute = None
-        self.second = None
-        self.zone = None
-
 class http_req:
     def __init__(self):
         self.method = None
@@ -29,7 +19,8 @@ class loggy:
         self.ip = ip()
         self.identity = None
         self.userID = None
-        self.time = time()
+        self.datetime = None #datetime.datetime
+        self.timezone = None
         self.http_req = http_req()
         self.status_code = None
         self.return_size = None

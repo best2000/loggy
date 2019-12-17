@@ -8,10 +8,8 @@ def ip_exist(address): #check exist return True//False
             while True:
                 object = pickle.load(file) #class ip object
                 if object.address == address:
-                    print("exist :", object.address)
                     return True
         except:
-            print("not exist :", address)
             return False
 
 def ip_add(address): #add ip object to database

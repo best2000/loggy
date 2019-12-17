@@ -1,4 +1,4 @@
-import pickle, re
+import pickle, re, datetime
 from class_all import *
 from ip_collector import *
 
@@ -17,41 +17,29 @@ def loggy_show_loggy(loggy_list):
         print(object.default_str)
 
 def loggy_search_date(date): #datetime.date
-    date = re.split('-', date)
-    month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    date[1] = month[int(date[1])-1]
     filtered_loggylist = []
     with open('class_loggy_obj.pickle', 'rb') as file: #read class loggy objects from file
         try:
             while True:
                 object = pickle.load(file) 
-                if object.time.day == date[0] and object.time.month == date[1] and object.time.year == date[2]:
+                if object.datetime.day == date.day and object.datetime.month == date.month and object.datetime.year == date.year:
                     filtered_loggylist.append(object)
         except: pass
     return filtered_loggylist
 
-def loggy_search_datedur(datedur): #16-17/May/2015 
-    #search from date input
-    datedur = re.split('/', datedur)
-    datedur[0] = re.split('-', datedur[0])
-    print(datedur)
-    #check this date make sense
-    if datedur[0][0] > datedur[0][1]: 
-        return None
-    elif datedur[0][0] == datedur[0][1]:
-        loggy_search_date(datedur[0][0]+'/'+datedur[1]+'/'+datedur[2])
-        return None
+def loggy_search_datedur(dt1, dt2): #datetime - datetime 
     #searching
     filtered_loggylist = []
-    day_target = []
-    for i in range(int(datedur[0][0]), int(datedur[0][1])+1):
-        day_target.append(str(i))
-    print(day_target)
     with open('class_loggy_obj.pickle', 'rb') as file: #read class loggy objects from file
         try:
             while True:
                 object = pickle.load(file) 
-                if object.time.day in day_target and object.time.month == datedur[1] and object.time.year == datedur[2]:
+                if (object.datetime.year >= dt1.year and object.datetime.year <= dt2.year 
+                and object.datetime.month >= dt1.month and object.datetime.month <= dt2.month
+                and object.datetime.day >= dt1.day and object.datetime.day <= dt2.day
+                and object.datetime.hour >= dt1.hour and object.datetime.hour <= dt2.hour
+                and object.datetime.minute >= dt1.minute and object.datetime.minute <= dt2.minute
+                and object.datetime.second >= dt1.second and object.datetime.second <= dt2.second):
                     filtered_loggylist.append(object)
         except: pass
     return filtered_loggylist
@@ -106,13 +94,13 @@ def loggy_read_log_file(path): #read log line put it into object loggy and save 
             object.ip = ip_get_object(temp[0][0])
             object.identity = temp[0][1]
             object.userID = temp[0][2]
-            object.time.day = temp[0][3][0]
-            object.time.month = temp[0][3][1]
-            object.time.year = temp[0][3][2][0]
-            object.time.hour = temp[0][3][2][1]
-            object.time.minute = temp[0][3][2][2]
-            object.time.second = temp[0][3][2][3]
-            object.time.zone = temp[0][4]
+            mon = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            for i in range(len(mon)):
+                if mon[i] == temp[0][3][1]:
+                    month = i+1
+                    break
+            object.datetime = datetime.datetime(int(temp[0][3][2][0]), month, int(temp[0][3][0]), int(temp[0][3][2][1]), int(temp[0][3][2][2]), int(temp[0][3][2][3]))
+            object.timezone = temp[0][4]
             
             #temp[1]----------------------------------
             temp[1] = re.split(' ', temp[1])

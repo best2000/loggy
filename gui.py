@@ -53,8 +53,7 @@ def log_search_ip_pop():
             listbox.insert('end', object.default_str)
     pop = Toplevel()
     pop.title("Log Search by IP..")
-    l = Label(pop, text="IP")
-    l.grid(row=0, column=0)
+    Label(pop, text="IP").grid(row=0, column=0)
     e1 = Entry(pop) 
     e1.grid(row=0, column=1)
     button=Button(pop, text="OK", command=log_search_ip)
@@ -63,20 +62,57 @@ def log_search_ip_pop():
 def log_search_date_pop():
     def log_search_date():
         listbox.delete(0,'end')
-        loggy_list = loggy_search_date(cal.format_date(cal.selection_get()))
+        loggy_list = loggy_search_date(cal.selection_get())
         for object in loggy_list:
             listbox.insert('end', object.default_str)
 
     pop = Toplevel()
     pop.title("Log Search by Date..")
-    cal = Calendar(pop, selectmode='day', showothermonthdays=False, year=2015, month=5, day=17, date_pattern='dd-mm-y')
+    cal = Calendar(pop, selectmode='day', showothermonthdays=False, year=2015, month=5)
     cal.grid(row=0, column=0)
     Button(pop, text="ok", command=log_search_date).grid(row=1, column=0)
-
+    #hilight date
     datelis = []
     for object in loggy_all():
-        date = object.time.day + 
-        cal.calevent_create(datetime.date(2015,5,1), 'get log', tags=['log'])
+        obj_date = datetime.date(object.datetime.year, object.datetime.month, object.datetime.day)
+        if obj_date not in datelis:
+            datelis.append(obj_date)
+            cal.calevent_create(obj_date, 'log', tags=['log'])
+
+def log_search_datedur_pop():
+    def log_search_date():
+        listbox.delete(0,'end')
+        loggy_list = loggy_search_date(cal.selection_get())
+        for object in loggy_list:
+            listbox.insert('end', object.default_str)
+
+    pop = Toplevel()
+    pop.title("Log Search by Date..")
+    Label(pop, text="time").grid(row=1, column=0)
+    e1 = Entry(pop) 
+    e1.grid(row=1, column=1)
+    Label(pop, text="to").grid(row=1, column=2)
+    e2 = Entry(pop) 
+    e2.grid(row=1, column=3)
+    Button(pop, text="ok", command=log_search_date).grid(row=1, column=4)
+    cal1 = Calendar(pop, selectmode='day', showothermonthdays=False, year=2015, month=5)
+    cal1.grid(row=0, column=0, columnspan=2)
+    datelis = [] 
+    for object in loggy_all():
+        obj_date = datetime.date(object.datetime.year, object.datetime.month, object.datetime.day)
+        if obj_date not in datelis:
+            datelis.append(obj_date)
+            cal1.calevent_create(obj_date, 'log', tags=['log'])
+    cal2 = Calendar(pop, selectmode='day', showothermonthdays=False, year=2015, month=5)
+    cal2.grid(row=0, column=2, columnspan=3)
+    datelis = [] 
+    for object in loggy_all():
+        obj_date = datetime.date(object.datetime.year, object.datetime.month, object.datetime.day)
+        if obj_date not in datelis:
+            datelis.append(obj_date)
+            cal2.calevent_create(obj_date, 'log', tags=['log'])
+    
+
 
 main = Tk()
 main.title('Loggy')
@@ -95,11 +131,11 @@ filemenu.add_cascade(label='Add log(rewrite).txt', command=add_log_re)
 searchmenu = Menu(main)
 menu.add_cascade(label='Search', menu=searchmenu)
 subsearchmenu = Menu(main)
-searchmenu.add_cascade(label='IP', command=ip_search_pop)
 searchmenu.add_cascade(label='Log', menu=subsearchmenu)
 subsearchmenu.add_cascade(label="Date", command=log_search_date_pop)
-subsearchmenu.add_cascade(label="Date-Date")
+subsearchmenu.add_cascade(label="Date-Date", command=log_search_datedur_pop)
 subsearchmenu.add_cascade(label="IP", command=log_search_ip_pop)
+searchmenu.add_cascade(label='IP', command=ip_search_pop)
             
 button2=Button(main, text="All Log", command=showLOG)
 button2.grid(row=0, column=1)
@@ -108,8 +144,6 @@ button1.grid(row=0, column=2)
 main.mainloop()
 
 
-#calendar
 #plot bar chart top 10 ip, loocation
-#add file log
 #search for date time to date time
 #map plot
