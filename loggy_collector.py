@@ -16,10 +16,10 @@ def loggy_show_loggy(loggy_list):
     for object in loggy_list:
         print(object.default_str)
 
-def loggy_search_date(date):
-    #search from date input
-    date = re.split('/', date)
-    #searching
+def loggy_search_date(date): #datetime.date
+    date = re.split('-', date)
+    month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    date[1] = month[int(date[1])-1]
     filtered_loggylist = []
     with open('class_loggy_obj.pickle', 'rb') as file: #read class loggy objects from file
         try:
