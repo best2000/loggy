@@ -156,5 +156,5 @@ searchmenu.add_cascade(label='IP', command=ip_search)
 
 main.mainloop()
 
-#plot bar chart top 10 ip, loocation
+#plot bar chart top 10 ip loocation
 #map plot
