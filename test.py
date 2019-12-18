@@ -1,25 +1,15 @@
-import tkinter as tk
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import numpy as np
+import matplotlib.pyplot as plt
+#NavigationToolbar2Tk
 
-OptionList = [] 
-for i in range(60):
-    OptionList.append(i)
-    
-app = tk.Tk()
+x = ('Python', 'C++', 'Java', 'Perl', 'Scala', 'Lisp')
+y = np.arange(len(x))
+performance = [10,8,6,4,2,1]
 
-app.geometry('100x200')
+plt.bar(y, performance, align='center', alpha=0.5)
+plt.xticks(y, x)
+plt.ylabel('Usage')
+plt.title('Programming language usage')
 
-variable = tk.StringVar(app)
-variable.set(OptionList[0])
-
-opt = tk.OptionMenu(app, variable, *OptionList)
-opt.config(width=90, font=('Helvetica', 12))
-opt.pack(side="top")
-
-
-
-def callback(*args):
-    print(variable.get())
-
-variable.trace("w", callback)
-
-app.mainloop()
+plt.show()

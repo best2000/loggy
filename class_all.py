@@ -6,6 +6,7 @@ class ip:
         self.lat = None
         self.lon = None
         self.isp = None
+        self.visit_rec = 1
 
 class http_req:
     def __init__(self):

@@ -33,9 +33,15 @@ def ip_add(address): #add ip object to database
             pickle.dump(object, file)
         print("ip added :", object.address, object.country, object.city, object.lat, object.lat, object.lon, object.isp)
     elif exist == True:
-        print(address, "is already exist")
-    else:
-        print("error!")
+        ip_lis = ip_all()
+        for i in range(len(ip_lis)):
+            if ip_lis[i].address == address:
+                ip_lis[i].visit_rec += 1
+                print(ip_lis[i].address, str(ip_lis[i].visit_rec)+'+1')
+                break
+        with open('class_ip_obj.pickle', 'wb') as file:
+            for object in ip_lis:
+                pickle.dump(object, file)
 
 def ip_remove(address):
     ip_list = [] #dummy list
@@ -78,4 +84,18 @@ def ip_get_object(address):
         except:
             print(address, "is not exist")
 
-#gui
+def sort_by_visit_rec():
+    ip_lis = ip_all()
+    visrec_lis = []
+    for object in ip_lis:
+        visrec_lis.append(object.visit_rec)
+    visrec_lis.sort(reverse=True)
+    sorted_loggylist = []
+    for rec in visrec_lis:
+        for object in ip_lis:
+            if object.visit_rec == rec:
+                sorted_loggylist.append(object)
+                ip_lis.remove(object)
+                break
+    return sorted_loggylist
+

@@ -23,7 +23,7 @@ def showIP():
     button.grid_remove()
     ip_lis = ip_all()
     for object in ip_lis:
-        Ip = object.address+' '+object.country+' '+object.city+' '+str(object.lat)+' '+str(object.lon)+' '+object.isp
+        Ip = object.address+' '+object.country+' '+object.city+' '+str(object.lat)+' '+str(object.lon)+' '+object.isp+' '+str(object.visit_rec)
         listbox.insert('end', Ip)
 
 
@@ -41,7 +41,7 @@ def ip_search():
     def ip_search():
         listbox.delete(0,'end')
         object = ip_get_object(e1.get())
-        Ip = object.address+' '+object.country+' '+object.city+' '+str(object.lat)+' '+str(object.lon)+' '+object.isp
+        Ip = object.address+' '+object.country+' '+object.city+' '+str(object.lat)+' '+str(object.lon)+' '+object.isp+' '+str(object.visit_rec)
         listbox.insert('end', Ip)
     la.configure(text='IP Search')
     la.grid() 
