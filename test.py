@@ -35,7 +35,6 @@ fig = plt.Figure(figsize=(6,5), dpi=100)
 pl = fig.add_subplot(111, title="Top 10 IP", xlabel="IP", ylabel="Visited")
 pl.bar(top, rec)
 
-
 pltk = FigureCanvasTkAgg(fig, root)
 pltk.get_tk_widget().grid(row=0, column=0)
 
