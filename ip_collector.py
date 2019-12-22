@@ -86,16 +86,21 @@ def ip_get_object(address):
 
 def sort_by_visit_rec():
     ip_lis = ip_all()
-    visrec_lis = []
+    iprec_dic = {}
     for object in ip_lis:
-        visrec_lis.append(object.visit_rec)
-    visrec_lis.sort(reverse=True)
-    sorted_loggylist = []
-    for rec in visrec_lis:
-        for object in ip_lis:
-            if object.visit_rec == rec:
-                sorted_loggylist.append(object)
-                ip_lis.remove(object)
-                break
-    return sorted_loggylist
+        iprec_dic[object.address] = object.visit_rec
+    iprec_dic_sorted = {k: v for k, v in sorted(iprec_dic.items(), key=lambda iprec_dic: iprec_dic[1], reverse=True)}
+    return iprec_dic_sorted
 
+def top_country():
+    ip_lis = ip_all()
+    country_dic = {}
+    for object in ip_lis:
+        try:
+            country_dic[object.country] += 1
+            continue
+        except: pass
+        country_dic[object.country] = 1
+
+    country_dic_sorted = {k: v for k, v in sorted(country_dic.items(), key=lambda country_dic: country_dic[1], reverse=True)}
+    return country_dic_sorted
