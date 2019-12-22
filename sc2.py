@@ -1,10 +1,8 @@
 
 import socket               # Import socket module
 
-s = socket.socket()         # Create a socket object
-host = socket.gethostname() # Get local machine name
-port = 80               # Reserve a port for your service.
-
-s.connect((host, port))
-print (s.recv(1024))
-s.close()                     # Close the socket when done
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)                 
+s.connect(("www.python.org" , 80))
+s.sendall(b'GET http://www.python.org HTTP/1.0\n\n')
+print (s.recv(4096))
+s.close()
