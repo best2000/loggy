@@ -84,16 +84,14 @@ def ip_get_object(address):
         except:
             print(address, "is not exist")
 
-def sort_by_visit_rec():
-    ip_lis = ip_all()
+def sort_by_visit_rec(ip_lis):
     iprec_dic = {}
     for object in ip_lis:
         iprec_dic[object.address] = object.visit_rec
     iprec_dic_sorted = {k: v for k, v in sorted(iprec_dic.items(), key=lambda iprec_dic: iprec_dic[1], reverse=True)}
     return iprec_dic_sorted
 
-def top_country():
-    ip_lis = ip_all()
+def top_country(ip_lis):
     country_dic = {}
     for object in ip_lis:
         try:
@@ -104,3 +102,9 @@ def top_country():
 
     country_dic_sorted = {k: v for k, v in sorted(country_dic.items(), key=lambda country_dic: country_dic[1], reverse=True)}
     return country_dic_sorted
+
+def ip_only(loggy_lis):
+    ip_lis = []
+    for object in loggy_lis:
+        ip_lis.append(object.ip)
+    return ip_lis
