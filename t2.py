@@ -133,23 +133,22 @@ frame_log = LabelFrame(root, text="Logs")
 frame_log.grid(row=0, column=0)
 
 fil_mode = ttk.Combobox(frame_log, values=["Date-Date", "Date"])
-Label(frame_log, text='Filter by').grid(row=0, column=0)
-fil_mode.grid(row=0, column=1)
+fil_mode.grid(row=0, column=0)
 fil_mode.current(1)
 fil_mode.bind("<<ComboboxSelected>>", check)
-
-Button(frame_log, text='All log', command=all_log).grid(row=0, column=2)
         
-Label(frame_log, text=" TO ").grid(row=1, column=3)
 e1 = Entry(frame_log, width=7) 
-e1.grid(row=2, column=1)
+e1.grid(row=2, column=0)
 e1.insert(END, '00:00:00')
 e1.configure(state='disabled')
 e2 = Entry(frame_log, width=7) 
-e2.grid(row=2, column=5)
+e2.grid(row=2, column=3)
 e2.insert(END, '00:00:00')
 e2.configure(state='disabled')
-Button(frame_log, text="Submit", command=log_search_date).grid(row=3, column=3)
+
+Button(frame_log, text="Submit", command=log_search_date).grid(row=3, column=1)
+Button(frame_log, text='All log', command=all_log).grid(row=0, column=3)
+
 cal1 = Calendar(frame_log, selectmode='day', showothermonthdays=False, year=2015, month=5, date_pattern='dd/mm/y')
 cal1.grid(row=1, column=0)
 datelis = [] 
@@ -160,7 +159,7 @@ for object in loggy_all():
         cal1.calevent_create(obj_date, 'log', tags=['log'])
 cal2 = Calendar(frame_log, selectmode='day', showothermonthdays=False, year=2015, month=5, date_pattern='dd/mm/y')
 cal2.configure(state='disabled')
-cal2.grid(row=1, column=4)
+cal2.grid(row=1, column=3)
 datelis = [] 
 for object in loggy_all():
     obj_date = datetime.date(object.datetime.year, object.datetime.month, object.datetime.day)
