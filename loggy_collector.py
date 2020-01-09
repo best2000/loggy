@@ -1,75 +1,37 @@
-import pickle, re, datetime
+import pickle, re, datetime, sql_log
 from class_all import *
 from ip_collector import *
 
+def loggy_creator(i):
+    object = loggy()
+    object.default_str = i[0]
+    object.ip = i[1]
+    object.identity = i[2]
+    object.userID = i[3]
+    temp = re.split("/", i[4])
+    object.datetime = datetime.datetime(int(temp[0]), int(temp[1]), int(temp[2]), int(temp[3]), int(temp[4]), int(temp[5])) 
+    object.timezone = i[5]
+    object.req = i[6]
+    object.status_code = i[7]
+    object.return_size = i[8]
+    object.referer = i[9]
+    object.user_agent = i[10]
+    return object
+
 def loggy_all(): #show all loggy object in database
     loggy_list = []
-    with open('class_loggy_obj.pickle', 'rb') as file:     
-        try:
-            while True:
-                object = pickle.load(file) 
-                loggy_list.append(object)
-        except:
-            return loggy_list
-
-def loggy_show_loggy(loggy_list):
-    for object in loggy_list:
-        print(object.default_str)
-
-def loggy_search_date(date): #datetime.date
-    filtered_loggylist = []
-    with open('class_loggy_obj.pickle', 'rb') as file: #read class loggy objects from file
-        try:
-            while True:
-                object = pickle.load(file) 
-                if object.datetime.day == date.day and object.datetime.month == date.month and object.datetime.year == date.year:
-                    filtered_loggylist.append(object)
-        except: pass
-    return filtered_loggylist
-
-def loggy_search_datedur(dt1, dt2): #datetime - datetime 
-    #searching
-    filtered_loggylist = []
-    with open('class_loggy_obj.pickle', 'rb') as file: #read class loggy objects from file
-        try:
-            while True:
-                object = pickle.load(file) 
-                if (object.datetime >= dt1) == True and (object.datetime <= dt2) == True:
-                    filtered_loggylist.append(object)
-        except: pass
-    return filtered_loggylist
-
-def loggy_search_ip(ip):
-    #searching
-    filtered_loggylist = []
-    with open('class_loggy_obj.pickle', 'rb') as file: #read class loggy objects from file
-        try:
-            while True:
-                object = pickle.load(file) 
-                if object.ip.address == ip:
-                    filtered_loggylist.append(object)
-        except: pass
-    return filtered_loggylist
-
-def loggy_database_append(loggy_list): #add loggy object to database
-    for object in loggy_list:
-        with open('class_loggy_obj.pickle', 'ab') as file:
-            pickle.dump(object, file)
-
-def loggy_database_rewrite(loggy_list):
-    for i in range(len(loggy_list)): #replace object in dummy list to database file
-        if i == 0:
-            with open('class_loggy_obj.pickle', 'wb') as file:
-                pickle.dump(loggy_list[i], file)
-        else:
-            with open('class_loggy_obj.pickle', 'ab') as file:
-                pickle.dump(loggy_list[i], file)
-                
+    loglis = sql_log.get_all_log()
+    for i in loglis:
+        object = loggy_creator(i)
+        loggy_list.append(object)
+    return loggy_list
+              
 def loggy_read_log_file(path): #read log line put it into object loggy and save in database RETURN loggy_list
-    loggy_list = []
+    mon = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     with open(path) as log:
         count = len(open(path).readlines())
         for i in range(count):
+            print('\r', i+1, '/', count, end="")
             logline = log.readline()
             temp = re.split('"', logline)
             temp.remove(' ')
@@ -86,22 +48,18 @@ def loggy_read_log_file(path): #read log line put it into object loggy and save 
             object = loggy()
             object.default_str = logline
             ip_add(temp[0][0]) #add to ip datbase auto check exist
-            object.ip = ip_get_object(temp[0][0])
+            object.ip = temp[0][0]
             object.identity = temp[0][1]
             object.userID = temp[0][2]
-            mon = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
             for i in range(len(mon)):
                 if mon[i] == temp[0][3][1]:
                     month = i+1
                     break
-            object.datetime = datetime.datetime(int(temp[0][3][2][0]), month, int(temp[0][3][0]), int(temp[0][3][2][1]), int(temp[0][3][2][2]), int(temp[0][3][2][3]))
+            object.datetime = "{}/{}/{}/{}/{}/{}".format(temp[0][3][2][0], month, temp[0][3][0], temp[0][3][2][1], temp[0][3][2][2], temp[0][3][2][3])
             object.timezone = temp[0][4]
             
             #temp[1]----------------------------------
-            temp[1] = re.split(' ', temp[1])
-            object.http_req.method = temp[1][0]
-            object.http_req.path = temp[1][1]
-            object.http_req.protocol = temp[1][2]
+            object.req = temp[1]
 
             #temp[2]----------------------------------
             temp[2] = re.split(' ', temp[2])
@@ -115,7 +73,7 @@ def loggy_read_log_file(path): #read log line put it into object loggy and save 
             #temp[4]----------------------------------
             object.user_agent = temp[4]
 
-            loggy_list.append(object)
+            sql_log.insert_log(object)
 
-    return(loggy_list)
+            
 
