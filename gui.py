@@ -1,4 +1,4 @@
-import re, datetime, tkinter, time, sql_log, pandas, io
+import re, datetime, tkinter, time, sql_log, pandas, threading
 from ip_collector import *
 from loggy_collector import *
 from tkinter import *
@@ -76,7 +76,7 @@ def replot():
     #replot######
     ip_analy_refresh()
     ##ip plot
-    fig = plt.Figure(figsize=(6,5), dpi=75)
+    fig = plt.Figure(figsize=(6,5), dpi=60)
     pl = fig.add_subplot(111, title="Top 10 IP", xlabel="IP", ylabel="Records")
     pl.bar(top, ip_df['REC'].head(10))
     pltk = FigureCanvasTkAgg(fig, frame_plot)
@@ -84,26 +84,27 @@ def replot():
         #######lis box
     listbox_top.delete(0,'end')
     for i, v in enumerate(ip_df[['IP','REC']].values.tolist()):
-        listbox_top.insert('end', str(i+1)+". "+v[0]+" ["+str(v[1])+"]")
+        listbox_top.insert('end', str(i+1)+".) "+v[0]+" ["+str(v[1])+"]")
     ##country plot
-    fig2 = plt.Figure(figsize=(6,5), dpi=75)
+    fig2 = plt.Figure(figsize=(6,5), dpi=60)
     pl2 = fig2.add_subplot(111, title="Top 10 Country", xlabel="Countries", ylabel="Records")
     pl2.bar(top, country_df['REC'].head(10))
     pltk2 = FigureCanvasTkAgg(fig2, frame_plot)
     pltk2.get_tk_widget().grid(row=0, column=2)
         ####list box
+    listbox_top2.delete(0, 'end')
     for i, v in enumerate(country_df[['COUNTRY','REC']].values.tolist()):
-        listbox_top2.insert('end', str(i+1)+". "+v[0]+" ["+str(v[1])+"]")
+        listbox_top2.insert('end', str(i+1)+".) "+v[0]+" ["+str(v[1])+"]")
     ##map plot
     lat = ip_df['LAT'].head(10).values
     lon = ip_df['LON'].head(10).values
 
-    fig3 = plt.Figure(figsize=(7,5), dpi=75)
+    fig3 = plt.Figure(figsize=(7,5), dpi=60)
     pl3 = fig3.add_subplot(111, title="Top 10 IP")
     m = Basemap(projection='mill',llcrnrlat=-60,urcrnrlat=90,\
                 llcrnrlon=-180,urcrnrlon=180,resolution='c',ax=pl3)
     pltk3 = FigureCanvasTkAgg(fig3, frame_plot)
-    pltk3.get_tk_widget().grid(row=0, column=3)
+    pltk3.get_tk_widget().grid(row=0, column=4)
 
     m.drawcoastlines()
     m.drawcountries()
@@ -150,6 +151,15 @@ def log_search_date():
 
     replot()
     
+def ip_search(event):
+    
+    listbox_ip.delete(0,'end')
+    if entry_ip.get() == "":
+        for i, v in enumerate(all_ip_tup): 
+            listbox_ip.insert('end', str(i+1)+'.) '+v[0]+" "+v[1]+" "+str(v[2])+" "+str(v[3])+" "+str(v[4]))
+    else:
+        tup = sql_ip.get_ip_by_ip(entry_ip.get())
+        listbox_ip.insert(0, tup[0], tup[1], tup[2], tup[3], tup[4])
 
 
 def all_log():
@@ -157,7 +167,18 @@ def all_log():
     log_tup = all_log_tup
     replot()
 
+def loading():
+    global stat
+    s = time.time()
+    while stat == 0:
+        print('\rLoading: '+str(time.time()-s), end="")
 
+
+########set up
+stat=0
+t = threading.Thread(target=loading, daemon=True)
+t.start()
+#######
 all_log_tup = sql_log.get_all_log()
 log_tup = all_log_tup 
 all_ip_tup = sql_ip.get_all_ip()
@@ -166,6 +187,8 @@ ip_analy_refresh()
 
 root = Tk()
 root.title('Loggy')
+
+
 #menubar##########################################
 menubar = Menu(root)  
 root.config(menu=menubar)
@@ -196,9 +219,9 @@ e2.configure(state='disabled')
 Button(frame_log, text="Submit", command=log_search_date).grid(row=3, column=1)
 Button(frame_log, text='All log', command=all_log).grid(row=0, column=3)
 
-cal1 = Calendar(frame_log, selectmode='day', showothermonthdays=False, year=2015, month=5, date_pattern='dd/mm/y')
+cal1 = Calendar(frame_log, selectmode='day', showothermonthdays=False, year=2015, month=5, date_pattern='dd/mm/y', font='Arial 8')
 cal1.grid(row=1, column=0)
-cal2 = Calendar(frame_log, selectmode='day', showothermonthdays=False, year=2015, month=5, date_pattern='dd/mm/y')
+cal2 = Calendar(frame_log, selectmode='day', showothermonthdays=False, year=2015, month=5, date_pattern='dd/mm/y', font='Arial 8')
 cal2.configure(state='disabled')
 cal2.grid(row=1, column=3)
 datelis = [] 
@@ -212,7 +235,21 @@ for tup in all_log_tup:
         cal2.calevent_create(log_date, 'log', tags=['log'])
 cal1.tag_config('log', background='Green')
 cal2.tag_config('log', background='Green')
-        
+##########ip database
+#ip database#############################################
+frame_ip = LabelFrame(root, text="IP Database")
+frame_ip.grid(row=0, column=1)
+
+listbox_ip = Listbox(frame_ip, width=70, height=14)
+listbox_ip.grid(row=1, column=0, columnspan=1)
+Scrollbar(frame_ip, command=listbox_ip.yview, orient=VERTICAL).grid(row=1, column=2, sticky='ns')
+
+entry_ip = Entry(frame_ip)
+entry_ip.grid(row=0, column=0, sticky='we')
+entry_ip.bind('<Return>', ip_search) #widget.bind("<Key>", key)
+
+for i, v in enumerate(all_ip_tup): 
+    listbox_ip.insert('end', str(i+1)+'.) '+v[0]+" "+v[1]+" "+str(v[2])+" "+str(v[3])+" "+str(v[4]))
 #plot################################################
 frame_plot = LabelFrame(root, text="Ranking")
 frame_plot.grid(row=1, column=0, columnspan=2)
@@ -220,7 +257,7 @@ frame_plot.grid(row=1, column=0, columnspan=2)
 top = [i+1 for i in range(10)]
 ######IP##################
 ##########ip
-fig = plt.Figure(figsize=(6,5), dpi=75)
+fig = plt.Figure(figsize=(6,5), dpi=60)
 pl = fig.add_subplot(111, title="Top 10 IP", xlabel="IP", ylabel="Records")
 pl.bar(top, ip_df['REC'].head(10))
 pltk = FigureCanvasTkAgg(fig, frame_plot)
@@ -228,14 +265,14 @@ pltk.get_tk_widget().grid(row=0, column=0)
     ##################################lisbox
 frame_plot_lisbox = LabelFrame(frame_plot, text="IP Ranking")
 frame_plot_lisbox.grid(row=0, column=1, sticky='ns')
-listbox_top = Listbox(frame_plot_lisbox, width=20, height=22)
+listbox_top = Listbox(frame_plot_lisbox, width=20, height=18)
 listbox_top.grid(row=0, column=0)
 Scrollbar(frame_plot_lisbox, command=listbox_top.yview, orient=VERTICAL).grid(row=0, column=1, sticky='ns')
 
 for i, v in enumerate(ip_df[['IP','REC']].values.tolist()):
-    listbox_top.insert('end', str(i+1)+". "+v[0]+" ["+str(v[1])+"]")
+    listbox_top.insert('end', str(i+1)+".) "+v[0]+" ["+str(v[1])+"]")
 ##########country 
-fig2 = plt.Figure(figsize=(6,5), dpi=75)
+fig2 = plt.Figure(figsize=(6,5), dpi=60)
 pl2 = fig2.add_subplot(111, title="Top 10 Country", xlabel="Countries", ylabel="Records")
 pl2.bar(top, country_df['REC'].head(10))
 pltk2 = FigureCanvasTkAgg(fig2, frame_plot)
@@ -243,17 +280,17 @@ pltk2.get_tk_widget().grid(row=0, column=2)
     #########lisbox
 frame_plot_lisbox2 = LabelFrame(frame_plot, text="Country Ranking")
 frame_plot_lisbox2.grid(row=0, column=3, sticky='ns')
-listbox_top2 = Listbox(frame_plot_lisbox2, width=20, height=22)
+listbox_top2 = Listbox(frame_plot_lisbox2, width=20, height=18)
 listbox_top2.grid(row=0, column=0)
 Scrollbar(frame_plot_lisbox2, command=listbox_top2.yview, orient=VERTICAL).grid(row=0, column=1, sticky='ns')
 
 for i, v in enumerate(country_df[['COUNTRY','REC']].values.tolist()):
-    listbox_top2.insert('end', str(i+1)+". "+v[0]+" ["+str(v[1])+"]")
+    listbox_top2.insert('end', str(i+1)+".) "+v[0]+" ["+str(v[1])+"]")
 ##########ip map plot
 lat = ip_df['LAT'].head(10).values
 lon = ip_df['LON'].head(10).values
 
-fig3 = plt.Figure(figsize=(7,5), dpi=75)
+fig3 = plt.Figure(figsize=(7,5), dpi=60)
 pl3 = fig3.add_subplot(111, title="Top 10 IP")
 m = Basemap(projection='mill',llcrnrlat=-60,urcrnrlat=90,\
             llcrnrlon=-180,urcrnrlon=180,resolution='c',ax=pl3)
@@ -271,6 +308,7 @@ lons, lats = m(lon, lat)
 m.scatter(lons, lats, marker = 'o', color='r', zorder=5)
 
 ##############################################################################
+stat = 1
 root.mainloop()
 
 #plot bar chart top 10 loocation
