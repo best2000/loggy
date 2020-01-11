@@ -1,4 +1,4 @@
-import re, datetime, tkinter, time, sql_log, pandas, threading
+import re, datetime, tkinter, time, sql_log, pandas, threading, socket
 from ip_collector import *
 from loggy_collector import *
 from tkinter import *
@@ -10,9 +10,41 @@ from ip_collector import *
 from tkinter import ttk
 from mpl_toolkits.basemap import Basemap
 
+
+def server_soc():
+    HOST = '127.0.0.1' 
+    PORT = 60000
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((HOST, PORT))
+    s.listen()
+    while True:
+        con, _ = s.accept()
+        top = Toplevel()
+        top.wm_title("Please Wait...")
+        l1=Label(top, text="Feel free to use program while adding")
+        l1.grid(row=0, column=0)
+        l2 = Label(top, text="")
+        l2.grid(row=2, column=0)
+        l3 = Label(top, text="DONT CLOSE THIS WINDOW IF IT NOT FINISHED!")
+        l3.grid(row=1, column=0)
+        while True:
+            data = con.recv(1024)
+            l2.configure(text=data.decode('utf-8'))
+            if data == b'add log finished':
+                top.wm_title("Finished...")
+                l1.configure(text="Logs added")
+                l3.configure(text="PRESS 'Refresh' BUTTOM TO REFRESH DATABASE INORDER TO USE IN PROGRAM")
+                l2.configure(text="You can close this.")
+                break
+        con.close()
+
 def add_log():
     filepath =  filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Text files","*.txt"),("all files","*.*")))
-    loggy_read_log_file(filepath)
+    t = threading.Thread(target=loggy_read_log_file, args=(filepath,), daemon=True)
+    t.start() #report to socket when finish 
+
+
+    
 
 def check(event):
     if fil_mode.get() == "Date-Date":
@@ -27,6 +59,9 @@ def check(event):
 def ip_analy_refresh():
     global ip_df
     global country_df
+    global all_log_tup
+    global log_tup
+    global all_ip_tup
     ####ip ana
     ip_sum = {}
     for tup in log_tup:
@@ -75,6 +110,15 @@ def ip_analy_refresh():
 def replot():
     #replot######
     ip_analy_refresh()
+    ##stats
+    la1.configure(text="Logs(DB): "+str(len(all_log_tup)))
+    la2.configure(text="IP(DB): "+str(len(all_ip_tup)))
+    la3.configure(text="Logs(vis): "+str(len(log_tup)))
+    la4.configure(text="IP(vis): "+str(ip_df.shape[0]))
+    #ip database
+    listbox_ip.delete(0,'end')
+    for i, v in enumerate(all_ip_tup): 
+        listbox_ip.insert('end', str(i+1)+'.) '+v[0]+" "+v[1]+" "+str(v[2])+" "+str(v[3])+" "+str(v[4]))
     ##ip plot
     fig = plt.Figure(figsize=(6,5), dpi=60)
     pl = fig.add_subplot(111, title="Top 10 IP", xlabel="IP", ylabel="Records")
@@ -164,20 +208,24 @@ def ip_search(event):
 
 def all_log():
     global log_tup
-    log_tup = all_log_tup
+    log_tup = all_log_tup 
     replot()
 
-def loading():
-    global stat
-    s = time.time()
-    while stat == 0:
-        print('\rLoading: '+str(time.time()-s), end="")
+def refresh_db():
+    global all_log_tup
+    global log_tup
+    global all_ip_tup
+    all_log_tup = sql_log.get_all_log()
+    log_tup = all_log_tup 
+    all_ip_tup = sql_ip.get_all_ip()
+    ip_analy_refresh()
+    replot()
+
+########socket set up
+st = threading.Thread(target=server_soc, daemon=True)
+st.start()
 
 
-########set up
-stat=0
-t = threading.Thread(target=loading, daemon=True)
-t.start()
 #######
 all_log_tup = sql_log.get_all_log()
 log_tup = all_log_tup 
@@ -218,12 +266,14 @@ e2.configure(state='disabled')
 
 Button(frame_log, text="Submit", command=log_search_date).grid(row=3, column=1)
 Button(frame_log, text='All log', command=all_log).grid(row=0, column=3)
+Button(frame_log, text='Refresh', command=refresh_db).grid(row=0, column=4)
+
 
 cal1 = Calendar(frame_log, selectmode='day', showothermonthdays=False, year=2015, month=5, date_pattern='dd/mm/y', font='Arial 8')
 cal1.grid(row=1, column=0)
 cal2 = Calendar(frame_log, selectmode='day', showothermonthdays=False, year=2015, month=5, date_pattern='dd/mm/y', font='Arial 8')
 cal2.configure(state='disabled')
-cal2.grid(row=1, column=3)
+cal2.grid(row=1, column=3, columnspan=2)
 datelis = [] 
 for tup in all_log_tup:
     dtf = re.split('/', tup[4])
@@ -235,10 +285,21 @@ for tup in all_log_tup:
         cal2.calevent_create(log_date, 'log', tags=['log'])
 cal1.tag_config('log', background='Green')
 cal2.tag_config('log', background='Green')
-##########ip database
+##########overall stat
+frame_stat = LabelFrame(root, text="Stats")
+frame_stat.grid(row=0, column=1)
+la1 = Label(frame_stat, text="Logs(DB): "+str(len(all_log_tup)))
+la1.grid(row=0, column=0)
+la2 = Label(frame_stat, text="IP(DB): "+str(len(all_ip_tup)))
+la2.grid(row=1, column=0)
+Label(frame_stat, text="").grid(row=2, column=0)
+la3 = Label(frame_stat, text="Logs(vis): "+str(len(all_log_tup)))
+la3.grid(row=3, column=0)
+la4 = Label(frame_stat, text="IP(vis): "+str(len(all_ip_tup)))
+la4.grid(row=4, column=0)
 #ip database#############################################
 frame_ip = LabelFrame(root, text="IP Database")
-frame_ip.grid(row=0, column=1)
+frame_ip.grid(row=0, column=2)
 
 listbox_ip = Listbox(frame_ip, width=70, height=14)
 listbox_ip.grid(row=1, column=0, columnspan=1)
@@ -252,7 +313,7 @@ for i, v in enumerate(all_ip_tup):
     listbox_ip.insert('end', str(i+1)+'.) '+v[0]+" "+v[1]+" "+str(v[2])+" "+str(v[3])+" "+str(v[4]))
 #plot################################################
 frame_plot = LabelFrame(root, text="Ranking")
-frame_plot.grid(row=1, column=0, columnspan=2)
+frame_plot.grid(row=1, column=0, columnspan=3)
 
 top = [i+1 for i in range(10)]
 ######IP##################
@@ -308,10 +369,11 @@ lons, lats = m(lon, lat)
 m.scatter(lons, lats, marker = 'o', color='r', zorder=5)
 
 ##############################################################################
-stat = 1
+#stat = 1
 root.mainloop()
 
 #plot bar chart top 10 loocation
 #map plot
 #md 5
 #direct store to db without transform to class 
+#show number of all times logs, ips/sometimes logs ips

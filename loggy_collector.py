@@ -1,4 +1,4 @@
-import pickle, re, datetime, sql_log
+import pickle, re, datetime, sql_log, socket
 from class_all import *
 from ip_collector import *
 
@@ -28,10 +28,13 @@ def loggy_all(): #show all loggy object in database
               
 def loggy_read_log_file(path): #read log line put it into object loggy and save in database RETURN loggy_list
     mon = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('127.0.0.1', 60000))
     with open(path) as log:
         count = len(open(path).readlines())
         for i in range(count):
-            print('\r', i+1, '/', count, end="")
+            text = str(i+1)+'/'+str(count)
+            s.send(str.encode(text))
             logline = log.readline()
             temp = re.split('"', logline)
             temp.remove(' ')
@@ -74,6 +77,7 @@ def loggy_read_log_file(path): #read log line put it into object loggy and save 
             object.user_agent = temp[4]
 
             sql_log.insert_log(object)
-
+    s.send(b'add log finished')
+    s.close()
             
 
