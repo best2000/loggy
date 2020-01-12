@@ -1,13 +1,5 @@
 import sqlite3
 
-
-def insert_ip(object):
-    with sqlite3.connect('ip.db') as con:
-        c = con.cursor()
-        c.execute("INSERT INTO ip VALUES ('{}', '{}', {}, {}, {})".format(object.address, object.country, object.lat, object.lon, object.visit_rec))
-        con.commit()
-
-
 def get_ip_by_ip(address):
     with sqlite3.connect('ip.db') as con:
         c = con.cursor()
@@ -20,20 +12,10 @@ def get_all_ip():
         c.execute("SELECT * FROM ip")
     return c.fetchall()
 
-def get_ip_rec_sort():
-    with sqlite3.connect('ip.db') as con:
-        c = con.cursor()
-        c.execute("SELECT * FROM ip ORDER BY visit_rec DESC LIMIT 10")
-    return c.fetchall()
-
-def update_rec(address):
-    with sqlite3.connect('ip.db') as con:
-        c = con.cursor()
-        c.execute("SELECT visit_rec FROM ip WHERE address='{}'".format(address))
-        v = c.fetchone()[0]
-        v = v+1 
-        c.execute("UPDATE ip SET visit_rec={} WHERE address='{}'".format(v, address))
-    
+def ip_exist(address): #check exist return True//False 
+    if get_ip_by_ip(address) == None:
+        return False
+    return True
 
 with sqlite3.connect('ip.db') as con:
     c = con.cursor()

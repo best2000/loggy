@@ -1,31 +1,10 @@
 import sqlite3
 
-
-def insert_log(object):
-    with sqlite3.connect('log.db') as con:
-        c = con.cursor()
-        c.execute("INSERT INTO log VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(object.default_str, object.ip, 
-                    object.identity,
-                    object.userID,
-                    object.datetime,
-                    object.timezone,
-                    object.req,
-                    object.status_code,
-                    object.return_size,
-                    object.referer,
-                    object.user_agent))
-        con.commit()
-
 def get_all_log():
     with sqlite3.connect('log.db') as con:
         c = con.cursor()
         c.execute("SELECT * FROM log")
     return c.fetchall()
-
-
-
-
-    
 
 with sqlite3.connect('log.db') as con:
     c = con.cursor()

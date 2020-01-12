@@ -1,12 +1,10 @@
 import re, datetime, tkinter, time, sql_log, pandas, threading, socket
-from ip_collector import *
 from loggy_collector import *
 from tkinter import *
 from tkinter import filedialog
 from tkcalendar import Calendar
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from ip_collector import *
 from tkinter import ttk
 from mpl_toolkits.basemap import Basemap
 
@@ -105,7 +103,6 @@ def ip_analy_refresh():
     for k in country_sum:
         dadic['REC'].append(country_sum[k])
     country_df = pandas.DataFrame(dadic).sort_values('REC', ascending=False)
-
 
 def replot():
     #replot######
@@ -224,7 +221,6 @@ def refresh_db():
 ########socket set up
 st = threading.Thread(target=server_soc, daemon=True)
 st.start()
-
 
 #######
 all_log_tup = sql_log.get_all_log()
