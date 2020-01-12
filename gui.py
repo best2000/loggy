@@ -40,6 +40,7 @@ def add_log():
     filepath =  filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Text files","*.txt"),("all files","*.*")))
     t = threading.Thread(target=loggy_read_log_file, args=(filepath,), daemon=True)
     t.start() #report to socket when finish 
+    
 
 
     
@@ -217,6 +218,15 @@ def refresh_db():
     all_ip_tup = sql_ip.get_all_ip()
     ip_analy_refresh()
     replot()
+    datelis = [] 
+    for tup in all_log_tup:
+        dtf = re.split('/', tup[4])
+        dtf = [ int(x) for x in dtf ]
+        log_date = datetime.date(dtf[0], dtf[1], dtf[2])
+        if log_date not in datelis:
+            datelis.append(log_date)
+            cal1.calevent_create(log_date, 'log', tags=['log'])
+            cal2.calevent_create(log_date, 'log', tags=['log'])
 
 ########socket set up
 st = threading.Thread(target=server_soc, daemon=True)
@@ -231,16 +241,6 @@ ip_analy_refresh()
 
 root = Tk()
 root.title('Loggy')
-
-
-#menubar##########################################
-menubar = Menu(root)  
-root.config(menu=menubar)
-
-filemenu = Menu(menubar) 
-menubar.add_cascade(label='File', menu=filemenu) 
-filemenu.add_cascade(label='Add log.txt', command=add_log)
-
 
 #loggy############################################
 frame_log = LabelFrame(root, text="Logs")
@@ -293,6 +293,8 @@ la3 = Label(frame_stat, text="Logs(vis): "+str(len(all_log_tup)))
 la3.grid(row=3, column=0)
 la4 = Label(frame_stat, text="IP(vis): "+str(len(all_ip_tup)))
 la4.grid(row=4, column=0)
+Label(frame_stat, text="").grid(row=5, column=0)
+Button(frame_stat, text="Add New Logs", command=add_log).grid(row=6, column=0)
 #ip database#############################################
 frame_ip = LabelFrame(root, text="IP Database")
 frame_ip.grid(row=0, column=2)
