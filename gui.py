@@ -40,10 +40,6 @@ def add_log():
     filepath =  filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Text files","*.txt"),("all files","*.*")))
     t = threading.Thread(target=loggy_read_log_file, args=(filepath,), daemon=True)
     t.start() #report to socket when finish 
-    
-
-
-    
 
 def check(event):
     if fil_mode.get() == "Date-Date":
@@ -120,7 +116,8 @@ def replot():
     ##ip plot
     fig = plt.Figure(figsize=(6,5), dpi=60)
     pl = fig.add_subplot(111, title="Top 10 IP", xlabel="IP", ylabel="Records")
-    pl.bar(top, ip_df['REC'].head(10))
+    rown = len(ip_df['REC'].head(10).index)
+    pl.bar([n for n in range(1, rown+1)], ip_df['REC'].head(10))
     pltk = FigureCanvasTkAgg(fig, frame_plot)
     pltk.get_tk_widget().grid(row=0, column=0)
         #######lis box
@@ -130,7 +127,8 @@ def replot():
     ##country plot
     fig2 = plt.Figure(figsize=(6,5), dpi=60)
     pl2 = fig2.add_subplot(111, title="Top 10 Country", xlabel="Countries", ylabel="Records")
-    pl2.bar(top, country_df['REC'].head(10))
+    rown = len(country_df['REC'].head(10).index)
+    pl2.bar([n for n in range(1, rown+1)], country_df['REC'].head(10))
     pltk2 = FigureCanvasTkAgg(fig2, frame_plot)
     pltk2.get_tk_widget().grid(row=0, column=2)
         ####list box
@@ -318,7 +316,8 @@ top = [i+1 for i in range(10)]
 ##########ip
 fig = plt.Figure(figsize=(6,5), dpi=60)
 pl = fig.add_subplot(111, title="Top 10 IP", xlabel="IP", ylabel="Records")
-pl.bar(top, ip_df['REC'].head(10))
+try: pl.bar(top, ip_df['REC'].head(10))
+except: pass
 pltk = FigureCanvasTkAgg(fig, frame_plot)
 pltk.get_tk_widget().grid(row=0, column=0)
     ##################################lisbox
@@ -333,7 +332,8 @@ for i, v in enumerate(ip_df[['IP','REC']].values.tolist()):
 ##########country 
 fig2 = plt.Figure(figsize=(6,5), dpi=60)
 pl2 = fig2.add_subplot(111, title="Top 10 Country", xlabel="Countries", ylabel="Records")
-pl2.bar(top, country_df['REC'].head(10))
+try: pl2.bar(top, country_df['REC'].head(10))
+except: pass
 pltk2 = FigureCanvasTkAgg(fig2, frame_plot)
 pltk2.get_tk_widget().grid(row=0, column=2)
     #########lisbox
@@ -349,7 +349,7 @@ for i, v in enumerate(country_df[['COUNTRY','REC']].values.tolist()):
 lat = ip_df['LAT'].head(10).values
 lon = ip_df['LON'].head(10).values
 
-fig3 = plt.Figure(figsize=(7,5), dpi=60)
+fig3 = plt.Figure(figsize=(7,5), dpi=70)
 pl3 = fig3.add_subplot(111, title="Top 10 IP")
 m = Basemap(projection='mill',llcrnrlat=-60,urcrnrlat=90,\
             llcrnrlon=-180,urcrnrlon=180,resolution='c',ax=pl3)
@@ -362,16 +362,14 @@ m.drawstates()
 m.drawmapboundary(fill_color='#46bcec')
 m.fillcontinents(color = 'white',lake_color='#46bcec')
 # convert lat and lon to map projection coordinates
-lons, lats = m(lon, lat)
+lon1, lat1 = m(lon, lat)
 # plot points as red dots
-m.scatter(lons, lats, marker = 'o', color='r', zorder=5)
-
+try: 
+    m.scatter(lon1, lat1, marker = 'o', color='r', zorder=5, s=100, alpha=0.5)
+except: pass
 ##############################################################################
-#stat = 1
 root.mainloop()
 
-#plot bar chart top 10 loocation
-#map plot
-#md 5
-#direct store to db without transform to class 
-#show number of all times logs, ips/sometimes logs ips
+#undo lastest added log
+#choose to add or remove added log
+#show hide console
