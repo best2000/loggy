@@ -24,8 +24,7 @@ with sqlite3.connect('ip.db') as con:
                     address text,
                     country text,
                     lat integer,
-                    lon integer,
-                    visit_rec integer
+                    lon integer
                     )""")
         con.commit()
     except: pass

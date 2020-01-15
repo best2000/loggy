@@ -18,21 +18,19 @@ def server_soc():
     while True:
         con, _ = s.accept()
         top = Toplevel()
-        top.wm_title("Please Wait...")
-        l1=Label(top, text="Feel free to use program while adding")
-        l1.grid(row=0, column=0)
+        top.wm_title("Just Wait...")
         l2 = Label(top, text="")
-        l2.grid(row=2, column=0)
-        l3 = Label(top, text="DONT CLOSE THIS WINDOW IF IT NOT FINISHED!")
-        l3.grid(row=1, column=0)
+        l2.grid(row=0, column=0)
+        
+        Label(top, text="").grid(row=3, column=0)
         while True:
             data = con.recv(1024)
             l2.configure(text=data.decode('utf-8'))
             if data == b'add log finished':
                 top.wm_title("Finished...")
-                l1.configure(text="Logs added")
-                l3.configure(text="PRESS 'Refresh' BUTTOM TO REFRESH DATABASE INORDER TO USE IN PROGRAM")
-                l2.configure(text="You can close this.")
+                l3 = Label(top, text="PRESS REFRESH WHEN FINISHED!")
+                l3.grid(row=1, column=0)
+                refresh_db()
                 break
         con.close()
 
@@ -57,15 +55,15 @@ def ip_analy_refresh():
     global all_log_tup
     global log_tup
     global all_ip_tup
+
     ####ip ana
     ip_sum = {}
     for tup in log_tup:
-        ip = tup[1]
+        ip = tup[0]
         if ip in ip_sum:
             ip_sum[ip] += 1
             continue
         ip_sum[ip] = 1  
-
     dadic = {
         'IP':[k for k in ip_sum],
         'REC':[],
@@ -82,6 +80,7 @@ def ip_analy_refresh():
     ip_df = pandas.DataFrame(dadic).sort_values('REC', ascending=False)
 
     ######country ana
+    
     country_sum = {}
     for k in ip_sum:
         for tup in all_ip_tup:
@@ -105,19 +104,27 @@ def replot():
     #replot######
     ip_analy_refresh()
     ##stats
-    la1.configure(text="Logs(DB): "+str(len(all_log_tup)))
+        #overall
+    la1.configure(text="Log(DB): "+str(len(all_log_tup)))
     la2.configure(text="IP(DB): "+str(len(all_ip_tup)))
-    la3.configure(text="Logs(vis): "+str(len(log_tup)))
+    la3.configure(text="Log(vis): "+str(len(log_tup)))
     la4.configure(text="IP(vis): "+str(ip_df.shape[0]))
-    #ip database
+        #log history
+    
+    listbox_lhis.delete(0,'end')
+    for i, v in enumerate(his_tup): 
+        listbox_lhis.insert('end', v[0]+" "+v[1]+" "+str(v[2]))
+        #ip database
     listbox_ip.delete(0,'end')
     for i, v in enumerate(all_ip_tup): 
-        listbox_ip.insert('end', str(i+1)+'.) '+v[0]+" "+v[1]+" "+str(v[2])+" "+str(v[3])+" "+str(v[4]))
+        listbox_ip.insert('end', str(i+1)+'.) '+v[0]+" "+v[1]+" "+str(v[2])+" "+str(v[3]))
     ##ip plot
     fig = plt.Figure(figsize=(6,5), dpi=60)
     pl = fig.add_subplot(111, title="Top 10 IP", xlabel="IP", ylabel="Records")
     rown = len(ip_df['REC'].head(10).index)
-    pl.bar([n for n in range(1, rown+1)], ip_df['REC'].head(10))
+    top = [n for n in range(1, rown+1)]
+    pl.bar(top, ip_df['REC'].head(10))
+    pl.set_xticks(top)
     pltk = FigureCanvasTkAgg(fig, frame_plot)
     pltk.get_tk_widget().grid(row=0, column=0)
         #######lis box
@@ -128,7 +135,9 @@ def replot():
     fig2 = plt.Figure(figsize=(6,5), dpi=60)
     pl2 = fig2.add_subplot(111, title="Top 10 Country", xlabel="Countries", ylabel="Records")
     rown = len(country_df['REC'].head(10).index)
-    pl2.bar([n for n in range(1, rown+1)], country_df['REC'].head(10))
+    top = [n for n in range(1, rown+1)]
+    pl2.bar(top, country_df['REC'].head(10))
+    pl2.set_xticks(top)
     pltk2 = FigureCanvasTkAgg(fig2, frame_plot)
     pltk2.get_tk_widget().grid(row=0, column=2)
         ####list box
@@ -154,7 +163,7 @@ def replot():
     # convert lat and lon to map projection coordinates
     lons, lats = m(lon, lat)
     # plot points as red dots
-    m.scatter(lons, lats, marker = 'o', color='r', zorder=5)
+    m.scatter(lons, lats, marker = 'o', color='r', zorder=5, s=100)
 
 def log_search_date():
     def loggy_search_date(date): #datetime.date
@@ -162,7 +171,7 @@ def log_search_date():
         global log_tup
         log_tup = []
         for tup in all_log_tup:
-            dtf = re.split('/', tup[4])
+            dtf = re.split('/', tup[3])
             dtf = [ int(x) for x in dtf ]
             dt = datetime.datetime(dtf[0], dtf[1], dtf[2], dtf[3], dtf[4], dtf[5])
             if dt.day == date.day and dt.month == date.month and dt.year == date.year:
@@ -172,7 +181,7 @@ def log_search_date():
         global log_tup
         log_tup = []
         for tup in all_log_tup:
-            dtf = re.split('/', tup[4])
+            dtf = re.split('/', tup[3])
             dtf = [ int(x) for x in dtf ]
             dt = datetime.datetime(dtf[0], dtf[1], dtf[2], dtf[3], dtf[4], dtf[5])
             if (dt >= dt1) == True and (dt <= dt2) == True:
@@ -192,15 +201,14 @@ def log_search_date():
     replot()
     
 def ip_search(event):
-    
     listbox_ip.delete(0,'end')
     if entry_ip.get() == "":
         for i, v in enumerate(all_ip_tup): 
             listbox_ip.insert('end', str(i+1)+'.) '+v[0]+" "+v[1]+" "+str(v[2])+" "+str(v[3])+" "+str(v[4]))
     else:
         tup = sql_ip.get_ip_by_ip(entry_ip.get())
-        listbox_ip.insert(0, tup[0], tup[1], tup[2], tup[3], tup[4])
-
+        listbox_ip.insert(0, "IP: "+tup[0], "Country: "+tup[1], "Lat: "+str(tup[2]), "Lon: "+str(tup[3]))
+        
 
 def all_log():
     global log_tup
@@ -211,14 +219,18 @@ def refresh_db():
     global all_log_tup
     global log_tup
     global all_ip_tup
+    global his_tup
     all_log_tup = sql_log.get_all_log()
     log_tup = all_log_tup 
     all_ip_tup = sql_ip.get_all_ip()
     ip_analy_refresh()
+    his_tup = sql_lhis.get_all_his()
     replot()
+    cal1.calevent_remove('all')
+    cal2.calevent_remove('all')
     datelis = [] 
     for tup in all_log_tup:
-        dtf = re.split('/', tup[4])
+        dtf = re.split('/', tup[3])
         dtf = [ int(x) for x in dtf ]
         log_date = datetime.date(dtf[0], dtf[1], dtf[2])
         if log_date not in datelis:
@@ -226,11 +238,31 @@ def refresh_db():
             cal1.calevent_create(log_date, 'log', tags=['log'])
             cal2.calevent_create(log_date, 'log', tags=['log'])
 
+def rollback():
+    i = listbox_lhis.curselection()[0]
+    his = listbox_lhis.get(i, None)
+    atime = his[0:19]
+    sql_lhis.rollback(atime)
+    sql_log.rollback(atime)
+    refresh_db() 
+    
+
+def ip_auto_fill(event):
+    i = listbox_ip.curselection()[0]
+    lip = listbox_ip.get(i, None)
+    entry_ip.delete(0, 'end')
+    entry_ip.insert(0, re.split(' ',lip)[1])
+
+def entry_clr(event):
+    if entry_ip.get() == "<ip search>":
+        entry_ip.delete(0, 'end')
+
 ########socket set up
 st = threading.Thread(target=server_soc, daemon=True)
 st.start()
 
-#######
+#######SET UP
+his_tup = sql_lhis.get_all_his()
 all_log_tup = sql_log.get_all_log()
 log_tup = all_log_tup 
 all_ip_tup = sql_ip.get_all_ip()
@@ -244,33 +276,34 @@ root.title('Loggy')
 frame_log = LabelFrame(root, text="Logs")
 frame_log.grid(row=0, column=0)
 
+Label(frame_log, text="Filter By").grid(row=0, column=0)
 fil_mode = ttk.Combobox(frame_log, values=["Date-Date", "Date"])
-fil_mode.grid(row=0, column=0)
+fil_mode.grid(row=0, column=2, columnspan=3)
 fil_mode.current(1)
 fil_mode.bind("<<ComboboxSelected>>", check)
         
 e1 = Entry(frame_log, width=7) 
-e1.grid(row=2, column=0)
+e1.grid(row=2, column=1, columnspan=2)
 e1.insert(END, '00:00:00')
 e1.configure(state='disabled')
 e2 = Entry(frame_log, width=7) 
-e2.grid(row=2, column=3)
+e2.grid(row=2, column=6, columnspan=2)
 e2.insert(END, '00:00:00')
 e2.configure(state='disabled')
 
-Button(frame_log, text="Submit", command=log_search_date).grid(row=3, column=1)
-Button(frame_log, text='All log', command=all_log).grid(row=0, column=3)
-Button(frame_log, text='Refresh', command=refresh_db).grid(row=0, column=4)
+Button(frame_log, text="Filter", command=log_search_date).grid(row=3, column=4, columnspan=4, sticky="ew")
+Button(frame_log, text='All Logs', command=all_log).grid(row=3, column=0, sticky="ew", columnspan=4)
+
 
 
 cal1 = Calendar(frame_log, selectmode='day', showothermonthdays=False, year=2015, month=5, date_pattern='dd/mm/y', font='Arial 8')
-cal1.grid(row=1, column=0)
+cal1.grid(row=1, column=0, columnspan=4)
 cal2 = Calendar(frame_log, selectmode='day', showothermonthdays=False, year=2015, month=5, date_pattern='dd/mm/y', font='Arial 8')
 cal2.configure(state='disabled')
-cal2.grid(row=1, column=3, columnspan=2)
+cal2.grid(row=1, column=6, columnspan=2)
 datelis = [] 
 for tup in all_log_tup:
-    dtf = re.split('/', tup[4])
+    dtf = re.split('/', tup[3])
     dtf = [ int(x) for x in dtf ]
     log_date = datetime.date(dtf[0], dtf[1], dtf[2])
     if log_date not in datelis:
@@ -279,51 +312,72 @@ for tup in all_log_tup:
         cal2.calevent_create(log_date, 'log', tags=['log'])
 cal1.tag_config('log', background='Green')
 cal2.tag_config('log', background='Green')
-##########overall stat
+##########overall stat##################################
 frame_stat = LabelFrame(root, text="Stats")
 frame_stat.grid(row=0, column=1)
-la1 = Label(frame_stat, text="Logs(DB): "+str(len(all_log_tup)))
-la1.grid(row=0, column=0)
-la2 = Label(frame_stat, text="IP(DB): "+str(len(all_ip_tup)))
-la2.grid(row=1, column=0)
-Label(frame_stat, text="").grid(row=2, column=0)
-la3 = Label(frame_stat, text="Logs(vis): "+str(len(all_log_tup)))
-la3.grid(row=3, column=0)
-la4 = Label(frame_stat, text="IP(vis): "+str(len(all_ip_tup)))
-la4.grid(row=4, column=0)
-Label(frame_stat, text="").grid(row=5, column=0)
-Button(frame_stat, text="Add New Logs", command=add_log).grid(row=6, column=0)
-#ip database#############################################
-frame_ip = LabelFrame(root, text="IP Database")
-frame_ip.grid(row=0, column=2)
+###
+frame_os = LabelFrame(frame_stat, text="Overall")
+frame_os.grid(row=0, column=0, sticky='n')
+la1 = Label(frame_os, text="Log(DB): "+str(len(all_log_tup)))
+la1.grid(row=0, column=0, sticky='w')
+la2 = Label(frame_os, text="IP(DB): "+str(len(all_ip_tup)))
+la2.grid(row=1, column=0, sticky='w')
+Label(frame_os, text="").grid(row=2, column=0)
+la3 = Label(frame_os, text="Log(vis): "+str(len(all_log_tup)))
+la3.grid(row=3, column=0, sticky='w')
+la4 = Label(frame_os, text="IP(vis): "+str(len(all_ip_tup)))
+la4.grid(row=4, column=0, sticky='w')
+#logs history###################
+frame_lhis = LabelFrame(frame_stat, text="Logs History <datetime/name/line>")
+frame_lhis.grid(row=0, column=1, rowspan=7, sticky='n')
+listbox_lhis = Listbox(frame_lhis, width=70, height=13, activestyle="none")
+listbox_lhis.grid(row=0, column=0, columnspan=3)
+Scrollbar(frame_lhis, command=listbox_lhis.yview, orient=VERTICAL).grid(row=0, column=3, sticky='ns')
+Button(frame_lhis, text="Add Logs File", command=add_log).grid(row=1, column=0, sticky="ew")
+Button(frame_lhis, text='Refresh', command=refresh_db).grid(row=1, column=2, sticky="ew", columnspan=2)
+Button(frame_lhis, text="Rollback", command=rollback).grid(row=1, column=1, sticky="ew")
 
-listbox_ip = Listbox(frame_ip, width=70, height=14)
-listbox_ip.grid(row=1, column=0, columnspan=1)
-Scrollbar(frame_ip, command=listbox_ip.yview, orient=VERTICAL).grid(row=1, column=2, sticky='ns')
+
+for i, v in enumerate(his_tup): 
+    listbox_lhis.insert('end', v[0]+" "+v[1]+" "+str(v[2]))
+#ip database#############################################
+frame_ip = LabelFrame(frame_stat, text="IP Database <ip/country/lat/lon/rec>")
+frame_ip.grid(row=0, column=2)
 
 entry_ip = Entry(frame_ip)
 entry_ip.grid(row=0, column=0, sticky='we')
+entry_ip.insert(0, "<ip search>")
 entry_ip.bind('<Return>', ip_search) #widget.bind("<Key>", key)
+entry_ip.bind("<Button-1>", entry_clr)
+
+listbox_ip = Listbox(frame_ip, width=70, height=13, activestyle="none")
+listbox_ip.grid(row=1, column=0, columnspan=1, sticky='n')
+listbox_ip.bind("<Button-1>", ip_auto_fill)
+listbox_ip.bind("<Return>", ip_search)
+Scrollbar(frame_ip, command=listbox_ip.yview, orient=VERTICAL).grid(row=1, column=2, sticky='ns')
 
 for i, v in enumerate(all_ip_tup): 
-    listbox_ip.insert('end', str(i+1)+'.) '+v[0]+" "+v[1]+" "+str(v[2])+" "+str(v[3])+" "+str(v[4]))
+    listbox_ip.insert('end', str(i+1)+'.) '+v[0]+" "+v[1]+" "+str(v[2])+" "+str(v[3]))
 #plot################################################
 frame_plot = LabelFrame(root, text="Ranking")
 frame_plot.grid(row=1, column=0, columnspan=3)
 
-top = [i+1 for i in range(10)]
 ######IP##################
 ##########ip
 fig = plt.Figure(figsize=(6,5), dpi=60)
 pl = fig.add_subplot(111, title="Top 10 IP", xlabel="IP", ylabel="Records")
-try: pl.bar(top, ip_df['REC'].head(10))
+try: 
+    rown = len(ip_df['REC'].head(10).index)
+    top = [i for i in range(1, rown+1)]
+    pl.bar(top, ip_df['REC'].head(10))
+    pl.set_xticks(top)
 except: pass
 pltk = FigureCanvasTkAgg(fig, frame_plot)
 pltk.get_tk_widget().grid(row=0, column=0)
     ##################################lisbox
 frame_plot_lisbox = LabelFrame(frame_plot, text="IP Ranking")
 frame_plot_lisbox.grid(row=0, column=1, sticky='ns')
-listbox_top = Listbox(frame_plot_lisbox, width=20, height=18)
+listbox_top = Listbox(frame_plot_lisbox, width=20, height=20, activestyle="none")
 listbox_top.grid(row=0, column=0)
 Scrollbar(frame_plot_lisbox, command=listbox_top.yview, orient=VERTICAL).grid(row=0, column=1, sticky='ns')
 
@@ -332,14 +386,18 @@ for i, v in enumerate(ip_df[['IP','REC']].values.tolist()):
 ##########country 
 fig2 = plt.Figure(figsize=(6,5), dpi=60)
 pl2 = fig2.add_subplot(111, title="Top 10 Country", xlabel="Countries", ylabel="Records")
-try: pl2.bar(top, country_df['REC'].head(10))
+try: 
+    rown = len(country_df['REC'].head(10).index)
+    top = [i for i in range(1, rown+1)]
+    pl2.bar(top, country_df['REC'].head(10))
+    pl2.set_xticks(top)
 except: pass
 pltk2 = FigureCanvasTkAgg(fig2, frame_plot)
 pltk2.get_tk_widget().grid(row=0, column=2)
     #########lisbox
 frame_plot_lisbox2 = LabelFrame(frame_plot, text="Country Ranking")
 frame_plot_lisbox2.grid(row=0, column=3, sticky='ns')
-listbox_top2 = Listbox(frame_plot_lisbox2, width=20, height=18)
+listbox_top2 = Listbox(frame_plot_lisbox2, width=20, height=20, activestyle="none")
 listbox_top2.grid(row=0, column=0)
 Scrollbar(frame_plot_lisbox2, command=listbox_top2.yview, orient=VERTICAL).grid(row=0, column=1, sticky='ns')
 
@@ -370,6 +428,6 @@ except: pass
 ##############################################################################
 root.mainloop()
 
-#undo lastest added log
-#choose to add or remove added log
+
 #show hide console
+#complete bubble map
