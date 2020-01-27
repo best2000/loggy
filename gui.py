@@ -204,7 +204,7 @@ def ip_search(event):
     listbox_ip.delete(0,'end')
     if entry_ip.get() == "":
         for i, v in enumerate(all_ip_tup): 
-            listbox_ip.insert('end', str(i+1)+'.) '+v[0]+" "+v[1]+" "+str(v[2])+" "+str(v[3])+" "+str(v[4]))
+            listbox_ip.insert('end', str(i+1)+'.) '+v[0]+" "+v[1]+" "+str(v[2])+" "+str(v[3]))
     else:
         tup = sql_ip.get_ip_by_ip(entry_ip.get())
         listbox_ip.insert(0, "IP: "+tup[0], "Country: "+tup[1], "Lat: "+str(tup[2]), "Lon: "+str(tup[3]))
