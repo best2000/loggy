@@ -163,7 +163,7 @@ def replot():
     # convert lat and lon to map projection coordinates
     lons, lats = m(lon, lat)
     # plot points as red dots
-    m.scatter(lons, lats, marker = 'o', color='r', zorder=5, s=100)
+    m.scatter(lons, lats, marker = 'o', color='r', zorder=5, s=[(i+1)*25 for i in range(10)])
 
 def log_search_date():
     def loggy_search_date(date): #datetime.date
@@ -257,6 +257,14 @@ def entry_clr(event):
     if entry_ip.get() == "<ip search>":
         entry_ip.delete(0, 'end')
 
+def tog():
+    if s_tog.get() == True:
+        frame_log.grid(row=0, column=0)
+        frame_stat.grid(row=0, column=1)
+    else:
+        frame_log.grid_remove()
+        frame_stat.grid_remove()
+
 ########socket set up
 st = threading.Thread(target=server_soc, daemon=True)
 st.start()
@@ -271,10 +279,15 @@ ip_analy_refresh()
 
 root = Tk()
 root.title('Loggy')
+menubar = Menu(root)
+s_tog = BooleanVar()
 
+view_menu = Menu(menubar)
+view_menu.add_checkbutton(label="Search menu", onvalue=1, offvalue=0, variable=s_tog, command=tog)
+menubar.add_cascade(label='Search', menu=view_menu)
+root.config(menu=menubar)
 #loggy############################################
 frame_log = LabelFrame(root, text="Logs")
-frame_log.grid(row=0, column=0)
 
 Label(frame_log, text="Filter By").grid(row=0, column=0)
 fil_mode = ttk.Combobox(frame_log, values=["Date-Date", "Date"])
@@ -314,7 +327,6 @@ cal1.tag_config('log', background='Green')
 cal2.tag_config('log', background='Green')
 ##########overall stat##################################
 frame_stat = LabelFrame(root, text="Stats")
-frame_stat.grid(row=0, column=1)
 ###
 frame_os = LabelFrame(frame_stat, text="Overall")
 frame_os.grid(row=0, column=0, sticky='n')
@@ -423,7 +435,7 @@ m.fillcontinents(color = 'white',lake_color='#46bcec')
 lon1, lat1 = m(lon, lat)
 # plot points as red dots
 try: 
-    m.scatter(lon1, lat1, marker = 'o', color='r', zorder=5, s=100, alpha=0.5)
+    m.scatter(lon1, lat1, marker = 'o', color=['r'], zorder=5, s=[(i+1)*25 for i in range(10)], alpha=0.75)
 except: pass
 ##############################################################################
 root.mainloop()
