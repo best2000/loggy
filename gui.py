@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import ttk
 from mpl_toolkits.basemap import Basemap
-
+from tkscrolledframe import ScrolledFrame
 
 def server_soc():
     HOST = '127.0.0.1' 
@@ -119,7 +119,7 @@ def replot():
     for i, v in enumerate(all_ip_tup): 
         listbox_ip.insert('end', str(i+1)+'.) '+v[0]+" "+v[1]+" "+str(v[2])+" "+str(v[3]))
     ##ip plot
-    fig = plt.Figure(figsize=(6,5), dpi=60)
+    fig = plt.Figure(figsize=(6,5), dpi=92)
     pl = fig.add_subplot(111, title="Top 10 IP", xlabel="IP", ylabel="Records")
     rown = len(ip_df['REC'].head(10).index)
     top = [n for n in range(1, rown+1)]
@@ -132,7 +132,7 @@ def replot():
     for i, v in enumerate(ip_df[['IP','REC']].values.tolist()):
         listbox_top.insert('end', str(i+1)+".) "+v[0]+" ["+str(v[1])+"]")
     ##country plot
-    fig2 = plt.Figure(figsize=(6,5), dpi=60)
+    fig2 = plt.Figure(figsize=(6,5), dpi=92)
     pl2 = fig2.add_subplot(111, title="Top 10 Country", xlabel="Countries", ylabel="Records")
     rown = len(country_df['REC'].head(10).index)
     top = [n for n in range(1, rown+1)]
@@ -148,22 +148,21 @@ def replot():
     lat = ip_df['LAT'].head(10).values
     lon = ip_df['LON'].head(10).values
 
-    fig3 = plt.Figure(figsize=(7,5), dpi=60)
+    fig3 = plt.Figure(figsize=(6,5), dpi=220)
     pl3 = fig3.add_subplot(111, title="Top 10 IP")
-    m = Basemap(projection='mill',llcrnrlat=-60,urcrnrlat=90,\
-                llcrnrlon=-180,urcrnrlon=180,resolution='c',ax=pl3)
-    pltk3 = FigureCanvasTkAgg(fig3, frame_plot)
-    pltk3.get_tk_widget().grid(row=0, column=4)
-
+    m=Basemap(llcrnrlon=-180, llcrnrlat=-60,urcrnrlon=180,urcrnrlat=80, projection='merc', ax=pl3)
+    m.drawmapboundary(fill_color='#A6CAE0')
+    m.fillcontinents(color='green', alpha=0.35, lake_color='#A6CAE0')
     m.drawcoastlines()
     m.drawcountries()
-    m.drawstates()
-    m.drawmapboundary(fill_color='#46bcec')
-    m.fillcontinents(color = 'white',lake_color='#46bcec')
+    
+    pltk3 = FigureCanvasTkAgg(fig3, frame_plot)
+    pltk3.get_tk_widget().grid(row=1, column=0, columnspan=4)
+
     # convert lat and lon to map projection coordinates
     lons, lats = m(lon, lat)
     # plot points as red dots
-    m.scatter(lons, lats, marker = 'o', color='r', zorder=5, s=[(i+1)*25 for i in range(10)])
+    m.scatter(lons, lats, marker = 'o', color='r', zorder=5, s=[(i+1)*25 for i in range(10)], alpha=0.75)
 
 def log_search_date():
     def loggy_search_date(date): #datetime.date
@@ -265,6 +264,10 @@ def tog():
         frame_log.grid_remove()
         frame_stat.grid_remove()
 
+def tog2(event):
+    s_tog.set(not (s_tog.get()))
+    tog()
+
 ########socket set up
 st = threading.Thread(target=server_soc, daemon=True)
 st.start()
@@ -281,6 +284,9 @@ root = Tk()
 root.title('Loggy')
 menubar = Menu(root)
 s_tog = BooleanVar()
+s_tog.set(True)
+
+root.bind("s", tog2)
 
 view_menu = Menu(menubar)
 view_menu.add_checkbutton(label="Search menu", onvalue=1, offvalue=0, variable=s_tog, command=tog)
@@ -301,7 +307,7 @@ e1.insert(END, '00:00:00')
 e1.configure(state='disabled')
 e2 = Entry(frame_log, width=7) 
 e2.grid(row=2, column=6, columnspan=2)
-e2.insert(END, '00:00:00')
+e2.insert(END, '23:59:59')
 e2.configure(state='disabled')
 
 Button(frame_log, text="Filter", command=log_search_date).grid(row=3, column=4, columnspan=4, sticky="ew")
@@ -327,6 +333,7 @@ cal1.tag_config('log', background='Green')
 cal2.tag_config('log', background='Green')
 ##########overall stat##################################
 frame_stat = LabelFrame(root, text="Stats")
+tog() #toggsearch
 ###
 frame_os = LabelFrame(frame_stat, text="Overall")
 frame_os.grid(row=0, column=0, sticky='n')
@@ -371,12 +378,23 @@ Scrollbar(frame_ip, command=listbox_ip.yview, orient=VERTICAL).grid(row=1, colum
 for i, v in enumerate(all_ip_tup): 
     listbox_ip.insert('end', str(i+1)+'.) '+v[0]+" "+v[1]+" "+str(v[2])+" "+str(v[3]))
 #plot################################################
-frame_plot = LabelFrame(root, text="Ranking")
-frame_plot.grid(row=1, column=0, columnspan=3)
+
+
+# Create a ScrolledFrame widget
+sf = ScrolledFrame(root, width=1400, height=750)
+sf.grid(row=1, column=0, columnspan=3)
+# Bind the arrow keys and scroll wheel
+sf.bind_scroll_wheel(root)
+
+# Create a frame within the ScrolledFrame
+inner_frame = sf.display_widget(Frame)
+
+frame_plot = LabelFrame(inner_frame, text="Ranking")
+frame_plot.grid(row=0, column=0)
 
 ######IP##################
 ##########ip
-fig = plt.Figure(figsize=(6,5), dpi=60)
+fig = plt.Figure(figsize=(6,5), dpi=92)
 pl = fig.add_subplot(111, title="Top 10 IP", xlabel="IP", ylabel="Records")
 try: 
     rown = len(ip_df['REC'].head(10).index)
@@ -389,14 +407,14 @@ pltk.get_tk_widget().grid(row=0, column=0)
     ##################################lisbox
 frame_plot_lisbox = LabelFrame(frame_plot, text="IP Ranking")
 frame_plot_lisbox.grid(row=0, column=1, sticky='ns')
-listbox_top = Listbox(frame_plot_lisbox, width=20, height=20, activestyle="none")
+listbox_top = Listbox(frame_plot_lisbox, width=20, height=27, activestyle="none")
 listbox_top.grid(row=0, column=0)
 Scrollbar(frame_plot_lisbox, command=listbox_top.yview, orient=VERTICAL).grid(row=0, column=1, sticky='ns')
 
 for i, v in enumerate(ip_df[['IP','REC']].values.tolist()):
     listbox_top.insert('end', str(i+1)+".) "+v[0]+" ["+str(v[1])+"]")
 ##########country 
-fig2 = plt.Figure(figsize=(6,5), dpi=60)
+fig2 = plt.Figure(figsize=(6,5), dpi=92)
 pl2 = fig2.add_subplot(111, title="Top 10 Country", xlabel="Countries", ylabel="Records")
 try: 
     rown = len(country_df['REC'].head(10).index)
@@ -409,7 +427,7 @@ pltk2.get_tk_widget().grid(row=0, column=2)
     #########lisbox
 frame_plot_lisbox2 = LabelFrame(frame_plot, text="Country Ranking")
 frame_plot_lisbox2.grid(row=0, column=3, sticky='ns')
-listbox_top2 = Listbox(frame_plot_lisbox2, width=20, height=20, activestyle="none")
+listbox_top2 = Listbox(frame_plot_lisbox2, width=20, height=27, activestyle="none")
 listbox_top2.grid(row=0, column=0)
 Scrollbar(frame_plot_lisbox2, command=listbox_top2.yview, orient=VERTICAL).grid(row=0, column=1, sticky='ns')
 
@@ -419,18 +437,19 @@ for i, v in enumerate(country_df[['COUNTRY','REC']].values.tolist()):
 lat = ip_df['LAT'].head(10).values
 lon = ip_df['LON'].head(10).values
 
-fig3 = plt.Figure(figsize=(7,5), dpi=70)
+fig3 = plt.Figure(figsize=(6,5), dpi=230)
 pl3 = fig3.add_subplot(111, title="Top 10 IP")
-m = Basemap(projection='mill',llcrnrlat=-60,urcrnrlat=90,\
-            llcrnrlon=-180,urcrnrlon=180,resolution='c',ax=pl3)
-pltk3 = FigureCanvasTkAgg(fig3, frame_plot)
-pltk3.get_tk_widget().grid(row=0, column=4)
 
+m=Basemap(llcrnrlon=-180, llcrnrlat=-60,urcrnrlon=180,urcrnrlat=80, projection='merc', ax=pl3)
+m.drawmapboundary(fill_color='#A6CAE0')
+m.fillcontinents(color='green', alpha=0.35, lake_color='#A6CAE0')
 m.drawcoastlines()
 m.drawcountries()
-m.drawstates()
-m.drawmapboundary(fill_color='#46bcec')
-m.fillcontinents(color = 'white',lake_color='#46bcec')
+
+pltk3 = FigureCanvasTkAgg(fig3, frame_plot)
+pltk3.get_tk_widget().grid(row=1, column=0, columnspan=4)
+
+
 # convert lat and lon to map projection coordinates
 lon1, lat1 = m(lon, lat)
 # plot points as red dots

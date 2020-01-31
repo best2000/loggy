@@ -6,7 +6,7 @@ root = Tk()
 
 # Create a ScrolledFrame widget
 sf = ScrolledFrame(root, width=640, height=480)
-sf.pack(side="top", expand=1, fill="both")
+sf.grid(row=0, column=0)
 
 # Bind the arrow keys and scroll wheel
 sf.bind_arrow_keys(root)
