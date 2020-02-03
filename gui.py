@@ -260,7 +260,9 @@ def tog():
     if s_tog.get() == True:
         frame_log.grid(row=0, column=0)
         frame_stat.grid(row=0, column=1)
+        sf.configure(height=474)
     else:
+        sf.configure(height=750)
         frame_log.grid_remove()
         frame_stat.grid_remove()
 
@@ -333,7 +335,6 @@ cal1.tag_config('log', background='Green')
 cal2.tag_config('log', background='Green')
 ##########overall stat##################################
 frame_stat = LabelFrame(root, text="Stats")
-tog() #toggsearch
 ###
 frame_os = LabelFrame(frame_stat, text="Overall")
 frame_os.grid(row=0, column=0, sticky='n')
@@ -381,7 +382,7 @@ for i, v in enumerate(all_ip_tup):
 
 
 # Create a ScrolledFrame widget
-sf = ScrolledFrame(root, width=1400, height=750)
+sf = ScrolledFrame(root, width=1410, height=750)
 sf.grid(row=1, column=0, columnspan=3)
 # Bind the arrow keys and scroll wheel
 sf.bind_scroll_wheel(root)
@@ -392,6 +393,7 @@ inner_frame = sf.display_widget(Frame)
 frame_plot = LabelFrame(inner_frame, text="Ranking")
 frame_plot.grid(row=0, column=0)
 
+tog() #toggsearch
 ######IP##################
 ##########ip
 fig = plt.Figure(figsize=(6,5), dpi=92)
