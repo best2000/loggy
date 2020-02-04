@@ -162,7 +162,7 @@ def replot():
     # convert lat and lon to map projection coordinates
     lons, lats = m(lon, lat)
     # plot points as red dots
-    m.scatter(lons, lats, marker = 'o', color='r', zorder=5, s=[(i+1)*25 for i in range(10)], alpha=0.75)
+    m.scatter(lons, lats, marker = 'o', color='r', zorder=5, s=[(10-i)*15 for i in range(10)], alpha=0.75)
 
 def log_search_date():
     def loggy_search_date(date): #datetime.date
@@ -456,11 +456,11 @@ pltk3.get_tk_widget().grid(row=1, column=0, columnspan=4)
 lon1, lat1 = m(lon, lat)
 # plot points as red dots
 try: 
-    m.scatter(lon1, lat1, marker = 'o', color=['r'], zorder=5, s=[(i+1)*25 for i in range(10)], alpha=0.75)
+    m.scatter(lon1, lat1, marker = 'o', color=['r'], zorder=5, s=[(10-i)*15 for i in range(10)], alpha=0.75)
 except: pass
 ##############################################################################
 root.mainloop()
 
-
-#show hide console
-#complete bubble map
+#better map like Y group
+#gui arrange
+#loading lag
