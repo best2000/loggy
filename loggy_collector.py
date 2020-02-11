@@ -15,6 +15,7 @@ def loggy_read_log_file(path): #read log line put it into object loggy and save 
                 s.connect(('127.0.0.1', 60000))
                 for i in range(count):
                     text = str(i+1)+'/'+str(count)
+                    print("\r"+text, end="")
                     s.send(str.encode(text))
                     logline = log.readline()
                     temp = re.split('"', logline)
