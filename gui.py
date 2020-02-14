@@ -256,7 +256,6 @@ def ip_auto_fill(event):
     entry_ip.insert(0, re.split(' ',lip)[1])
 
 def ip_auto_fill2(event):
-    print("lol")
     i = listbox_top.curselection()[0]
     lip = listbox_top.get(i, None)
     entry_ip.delete(0, 'end')
@@ -426,7 +425,7 @@ listbox_top.bind("<Button-1>", ip_auto_fill2)
 listbox_top.bind("<Return>", ip_search)
 
 for i, v in enumerate(ip_df[['IP','REC']].values.tolist()):
-    listbox_top.insert('end', str(i+1)+".) "+v[0]+" ["+str(v[1])+"]")
+    listbox_top.insert('end', str(i+1)+".)"+v[0]+"["+str(v[1])+"]")
 ##########country 
 fig2 = plt.Figure(figsize=(6,5), dpi=75)
 pl2 = fig2.add_subplot(111, title="Top 10 Country", xlabel="Countries", ylabel="Records")
@@ -446,7 +445,7 @@ listbox_top2.grid(row=0, column=0)
 Scrollbar(frame_plot_lisbox2, command=listbox_top2.yview, orient=VERTICAL).grid(row=0, column=1, sticky='ns')
 
 for i, v in enumerate(country_df[['COUNTRY','REC']].values.tolist()):
-    listbox_top2.insert('end', str(i+1)+".) "+v[0]+" ["+str(v[1])+"]")
+    listbox_top2.insert('end', str(i+1)+".)"+v[0]+"["+str(v[1])+"]")
 ##########ip map plot
 lat = ip_df['LAT'].head(10).values
 lon = ip_df['LON'].head(10).values
@@ -476,3 +475,8 @@ root.mainloop()
 
 #correction test
 #map error not plot
+
+#50 ip
+#ความเร็วเพิ่มไฟล์
+#doc,excel
+#indexing
