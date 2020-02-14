@@ -145,24 +145,27 @@ def replot():
     for i, v in enumerate(country_df[['COUNTRY','REC']].values.tolist()):
         listbox_top2.insert('end', str(i+1)+".) "+v[0]+" ["+str(v[1])+"]")
     ##map plot
+    print(ip_df.head())
     lat = ip_df['LAT'].head(10).values
     lon = ip_df['LON'].head(10).values
 
     fig3 = plt.Figure(figsize=(6,5), dpi=150)
     pl3 = fig3.add_subplot(111, title="Top 10 IP")
+
     m=Basemap(llcrnrlon=-180, llcrnrlat=-60,urcrnrlon=180,urcrnrlat=80, projection='merc', ax=pl3)
     m.drawmapboundary(fill_color='#A6CAE0')
-    m.fillcontinents(color='green', alpha=0.35, lake_color='#A6CAE0')
-    m.drawcoastlines()
-    m.drawcountries()
-    
+    m.fillcontinents(color='green', alpha=0.4, lake_color='#A6CAE0')
+    #m.drawcoastlines()
+    #m.drawcountries()
+
     pltk3 = FigureCanvasTkAgg(fig3, frame_plot)
-    pltk.get_tk_widget().grid(row=0, column=1)
+    pltk3.get_tk_widget().grid(row=0, column=0, rowspan=2)
+
 
     # convert lat and lon to map projection coordinates
-    lons, lats = m(lon, lat)
+    lon1, lat1 = m(lon, lat)
     # plot points as red dots
-    m.scatter(lons, lats, marker = 'o', color='r', zorder=5, s=[(10-i)*15 for i in range(10)], alpha=0.75)
+    m.scatter(lon1, lat1, marker = 'o', color=['r'], zorder=5, s=[(10-i)*15 for i in range(10)], alpha=0.75)
 
 def log_search_date():
     def loggy_search_date(date): #datetime.date
@@ -249,6 +252,13 @@ def rollback():
 def ip_auto_fill(event):
     i = listbox_ip.curselection()[0]
     lip = listbox_ip.get(i, None)
+    entry_ip.delete(0, 'end')
+    entry_ip.insert(0, re.split(' ',lip)[1])
+
+def ip_auto_fill2(event):
+    print("lol")
+    i = listbox_top.curselection()[0]
+    lip = listbox_top.get(i, None)
     entry_ip.delete(0, 'end')
     entry_ip.insert(0, re.split(' ',lip)[1])
 
@@ -412,6 +422,8 @@ frame_plot_lisbox.grid(row=0, column=2, sticky='ns')
 listbox_top = Listbox(frame_plot_lisbox, width=20, height=22, activestyle="none")
 listbox_top.grid(row=0, column=0)
 Scrollbar(frame_plot_lisbox, command=listbox_top.yview, orient=VERTICAL).grid(row=0, column=1, sticky='ns')
+listbox_top.bind("<Button-1>", ip_auto_fill2)
+listbox_top.bind("<Return>", ip_search)
 
 for i, v in enumerate(ip_df[['IP','REC']].values.tolist()):
     listbox_top.insert('end', str(i+1)+".) "+v[0]+" ["+str(v[1])+"]")
@@ -457,6 +469,7 @@ lon1, lat1 = m(lon, lat)
 # plot points as red dots
 try: 
     m.scatter(lon1, lat1, marker = 'o', color=['r'], zorder=5, s=[(10-i)*15 for i in range(10)], alpha=0.75)
+    print("lol")
 except: pass
 ##############################################################################
 root.mainloop()
