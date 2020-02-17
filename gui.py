@@ -145,9 +145,8 @@ def replot():
     for i, v in enumerate(country_df[['COUNTRY','REC']].values.tolist()):
         listbox_top2.insert('end', str(i+1)+".) "+v[0]+" ["+str(v[1])+"]")
     ##map plot
-    print(ip_df.head())
-    lat = ip_df['LAT'].head(10).values
-    lon = ip_df['LON'].head(10).values
+    lat = ip_df['LAT'].head(50).values
+    lon = ip_df['LON'].head(50).values
 
     fig3 = plt.Figure(figsize=(6,5), dpi=150)
     pl3 = fig3.add_subplot(111, title="Top 10 IP")
@@ -165,7 +164,7 @@ def replot():
     # convert lat and lon to map projection coordinates
     lon1, lat1 = m(lon, lat)
     # plot points as red dots
-    m.scatter(lon1, lat1, marker = 'o', color=['r'], zorder=5, s=[(10-i)*15 for i in range(10)], alpha=0.75)
+    m.scatter(lon1, lat1, marker = 'o', color=['r'], zorder=5, s=[(50-i)*10 for i in range(50)], alpha=0.75)
 
 def log_search_date():
     def loggy_search_date(date): #datetime.date
@@ -425,7 +424,7 @@ listbox_top.bind("<Button-1>", ip_auto_fill2)
 listbox_top.bind("<Return>", ip_search)
 
 for i, v in enumerate(ip_df[['IP','REC']].values.tolist()):
-    listbox_top.insert('end', str(i+1)+".)"+v[0]+"["+str(v[1])+"]")
+    listbox_top.insert('end', str(i+1)+".) "+v[0]+" ["+str(v[1])+"]")
 ##########country 
 fig2 = plt.Figure(figsize=(6,5), dpi=75)
 pl2 = fig2.add_subplot(111, title="Top 10 Country", xlabel="Countries", ylabel="Records")
@@ -447,8 +446,8 @@ Scrollbar(frame_plot_lisbox2, command=listbox_top2.yview, orient=VERTICAL).grid(
 for i, v in enumerate(country_df[['COUNTRY','REC']].values.tolist()):
     listbox_top2.insert('end', str(i+1)+".)"+v[0]+"["+str(v[1])+"]")
 ##########ip map plot
-lat = ip_df['LAT'].head(10).values
-lon = ip_df['LON'].head(10).values
+lat = ip_df['LAT'].head(50).values
+lon = ip_df['LON'].head(50).values
 
 fig3 = plt.Figure(figsize=(6,5), dpi=150)
 pl3 = fig3.add_subplot(111, title="Top 10 IP")
@@ -467,8 +466,7 @@ pltk3.get_tk_widget().grid(row=0, column=0, rowspan=2)
 lon1, lat1 = m(lon, lat)
 # plot points as red dots
 try: 
-    m.scatter(lon1, lat1, marker = 'o', color=['r'], zorder=5, s=[(10-i)*15 for i in range(10)], alpha=0.75)
-    print("lol")
+    m.scatter(lon1, lat1, marker = 'o', color=['r'], zorder=5, s=[(50-i)*10 for i in range(50)], alpha=0.75)
 except: pass
 ##############################################################################
 root.mainloop()

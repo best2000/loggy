@@ -1,6 +1,8 @@
 import pickle, re, datetime, sql_log, socket, sql_ip, requests, time, sqlite3, sql_lhis, os
 
 def loggy_read_log_file(path): #read log line put it into object loggy and save in database RETURN loggy_list
+    start = time.time()
+
     mon = {'Jan':1, 'Feb':2, 'Mar':3, 'Apr':4, 'May':5, 'Jun':6, 'Jul':7, 'Aug':8, 'Sep':9, 'Oct':10, 'Nov':11, 'Dec':12}
     with sqlite3.connect('log.db') as con:
         c = con.cursor()
@@ -14,8 +16,8 @@ def loggy_read_log_file(path): #read log line put it into object loggy and save 
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.connect(('127.0.0.1', 60000))
                 for i in range(count):
+                    st=time.time()
                     text = str(i+1)+'/'+str(count)
-                    print("\r"+text, end="")
                     s.send(str.encode(text))
                     logline = log.readline()
                     temp = re.split('"', logline)
@@ -53,11 +55,14 @@ def loggy_read_log_file(path): #read log line put it into object loggy and save 
                                         temp[3],
                                         temp[4],
                                         dt))
+                    print(time.time()-st)
             con2.commit()
         con.commit()
     s.send(b'add log finished')
     s.close()
     
+    end = time.time()
+    print("loggy1 :", end - start)
 
 
 #def 15796
